@@ -1,5 +1,6 @@
 package com.example.movieapp
 
+import android.content.Intent
 import android.media.Image
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,11 +12,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -42,6 +45,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -50,19 +54,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.movieapp.ViewModel.MainViewModel
 import com.example.movieapp.domain.FilmItemModel
+import com.example.movieapp.ui.theme.Black3
 import com.example.movieapp.ui.theme.MovieAppTheme
+import com.example.movieapp.ui.theme.Pink
+import com.example.movieapp.ui.theme.Red
 
 class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MovieAppTheme {
-                Scaffold {
-                    MainScreen {  }
+            MovieAppTheme{
+                MainScreen {
+                    item->
+                    val intent= Intent(this,DetailMovieActivity::class.java)
+                    intent.putExtra("object",item)
+                    startActivity(intent)
                 }
-
             }
+
         }
     }
 }
@@ -90,24 +100,32 @@ fun Preview(){
 @Composable
 fun MainScreen(onItemClick :(FilmItemModel)->Unit){
     Scaffold(
-        bottomBar={ BottomNavigationBar()},
+        bottomBar={
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxWidth(),
+                ){
+                BottomNavigationBar(link = R.drawable.facebook)
+
+            }
+                  },
         floatingActionButton = {
             Box(
-                modifier = Modifier.size(MovieAppTheme.dimensionValue.floatingButtonSize)
+                modifier = Modifier.size(60.dp)
                     .background(
                         brush = Brush.linearGradient(
-                            colors = MovieAppTheme.colorScheme.linearGradientColorsForButton
+                            colors = listOf(Pink, Red)
                         ),
                         shape = CircleShape
                     )
-                    .padding(MovieAppTheme.dimensionValue.borderWidthForTextField)
+                    .padding(3.dp)
             ){
                 FloatingActionButton(
                     onClick = {},
-                    backgroundColor = MovieAppTheme.colorScheme.floatingButtonBackgroundColor,
+                    backgroundColor = Black3,
                     modifier = Modifier
-                        .size(MovieAppTheme.dimensionValue.floatingButtonSize),
-                    contentColor = MovieAppTheme.colorScheme.contentColorForButton,
+                        .size(58.dp),
+                    contentColor = Color.White,
                     content = {
                         Icon(painter = painterResource(R.drawable.float_icon),
                             contentDescription = null,
@@ -120,25 +138,24 @@ fun MainScreen(onItemClick :(FilmItemModel)->Unit){
         },
         isFloatingActionButtonDocked = true,
         floatingActionButtonPosition = FabPosition.Center,
-        backgroundColor = MovieAppTheme.colorScheme.backGroundColor
+        backgroundColor = colorResource(R.color.blackBackground)
         )
     {
         paddingValues ->
         Box(
             modifier = Modifier
                 .padding(paddingValues)
-                .background(color = MovieAppTheme.colorScheme.backGroundColor)
+                .background(color =colorResource(R.color.blackBackground))
         ){
             Image(
                 painter = painterResource(id= R.drawable.bg1),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.matchParentSize()
+                modifier = Modifier.fillMaxSize()
             )
+            MainContent(onItemClick)
         }
-        MainContent {
 
-        }
     }
 }
 @Composable
@@ -166,16 +183,8 @@ fun MainContent(onItemClick: (FilmItemModel) -> Unit){
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(top = 60.dp,bottom=100.dp)
+            .padding(top = 40.dp,bottom=0.dp)
     ) {
-        Text(
-            text="What would you like to watch ?",
-            style = MovieAppTheme.appTypoTheme.textRecommend,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(start=16.dp,bottom = 16.dp)
-                .fillMaxWidth()
-        )
         SearchBar(hint = "Search ..")
         SectionTitle("New Movies")
         if(showNewMovieLoading){
@@ -223,6 +232,6 @@ fun MainContent(onItemClick: (FilmItemModel) -> Unit){
 fun SectionTitle(title:String){
     Text(text = title,
         style = TextStyle(color = Color(0xffffc107), fontSize = 18.sp, fontWeight = FontWeight.Bold),
-        modifier = Modifier.padding(start = 16.dp,top = 32.dp,bottom = 8.dp)
+        modifier = Modifier.padding(start = 16.dp,top = 16.dp,bottom = 8.dp)
     )
 }

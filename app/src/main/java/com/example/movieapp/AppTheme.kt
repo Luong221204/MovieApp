@@ -68,7 +68,7 @@ data class DimensionValue(
     var roundCornerForTextField: Dp = 20.dp,
     var borderWidthForTextField :Dp = 2.dp,
     var iconSize:Dp = 40.dp,
-    var iconSize2:Dp = 40.dp,
+    var iconSize2:Dp = 24.dp,
     var bottomMenuIconSize:Dp = 20.dp,
     var floatingButtonSize:Dp=60.dp,
     )

@@ -1,7 +1,9 @@
 package com.example.movieapp
 
 import android.content.ClipData.Item
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
@@ -17,6 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
@@ -35,6 +40,13 @@ fun FilmItem(item:FilmItemModel,onClick:(FilmItemModel)->Unit){
             .clickable {
                 onClick(item)
             }
+            .shadow(
+                elevation = 8.dp, // độ đổ bóng
+                shape = RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField),
+                clip = false // để bóng không bị cắt bởi clip
+            )
+            .border(BorderStroke(width=1.dp, color = Color.Black), shape =RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField) )
+            .clip(RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField))
             .background(color = Red)
     ){
         AsyncImage(
@@ -42,7 +54,7 @@ fun FilmItem(item:FilmItemModel,onClick:(FilmItemModel)->Unit){
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .size(width = 120.dp,height = 180.dp)
+                .size(width = 120.dp,height = 150.dp)
                 .background(Color.Gray)
         )
         Spacer(modifier = Modifier.height(8.dp))

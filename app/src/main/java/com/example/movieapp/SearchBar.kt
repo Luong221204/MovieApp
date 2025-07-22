@@ -1,6 +1,8 @@
 package com.example.movieapp
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -19,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode.Companion.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,7 +41,13 @@ fun SearchBar(hint:String = ""){
             .background(
                 color = BlackGray,shape= RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField)
             )
-            .padding(horizontal = 50.dp),
+            .border(BorderStroke(
+                width = MovieAppTheme.dimensionValue.borderWidthForTextField ,
+                brush = Brush.linearGradient(colors =MovieAppTheme.colorScheme.linearGradientColorsForTextField)),
+                shape = RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField)
+            )
+            .padding(horizontal = 16.dp)
+        ,
         verticalAlignment = Alignment.CenterVertically
     ){
         Icon(
@@ -52,6 +61,7 @@ fun SearchBar(hint:String = ""){
             placeholder = {
                 Text(text=hint ,color = unknown)
             },
+
             colors = TextFieldDefaults.textFieldColors(
                 cursorColor = MovieAppTheme.colorScheme.cursorColor,
                 focusedIndicatorColor = MovieAppTheme.colorScheme.focusIndicatorColor,
