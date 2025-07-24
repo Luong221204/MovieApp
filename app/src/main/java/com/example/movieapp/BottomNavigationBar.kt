@@ -37,9 +37,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import org.jetbrains.annotations.Async
 
 @Composable
-fun BottomNavigationBar(link: Int?=null){
+fun BottomNavigationBar(link: String?=null){
     val contextForToast= LocalContext.current.applicationContext
     var selectedItem by remember{
         mutableStateOf("Home")
@@ -74,8 +76,8 @@ fun BottomNavigationBar(link: Int?=null){
                 },
                 icon={
                     if(bottomMenuItem.link != null){
-                        Image(
-                            painter = painterResource(bottomMenuItem.link),
+                        AsyncImage(
+                            model = link,
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
@@ -106,7 +108,7 @@ fun BottomNavigationBar(link: Int?=null){
 data class BottomMenuItem(
     val label:String,
     val icon:Painter,
-    val link:Int?=null,
+    val link:String?=null,
     var selectedItem:String
 ){
     var checked=selectedItem==label
@@ -115,7 +117,7 @@ data class BottomMenuItem(
 
 
 @Composable
-fun prepareBottomMenu( link:Int? = null,selectedItem:String):List<BottomMenuItem>{
+fun prepareBottomMenu( link:String? = null,selectedItem:String):List<BottomMenuItem>{
     return listOf(
         BottomMenuItem(
             label = "Home",

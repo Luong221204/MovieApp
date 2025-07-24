@@ -1,5 +1,6 @@
 package com.example.movieapp
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.media.Image
 import android.os.Bundle
@@ -58,6 +59,8 @@ import com.example.movieapp.ui.theme.Black3
 import com.example.movieapp.ui.theme.MovieAppTheme
 import com.example.movieapp.ui.theme.Pink
 import com.example.movieapp.ui.theme.Red
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -99,13 +102,14 @@ fun Preview(){
 }
 @Composable
 fun MainScreen(onItemClick :(FilmItemModel)->Unit){
+    val user=FirebaseAuth.getInstance().currentUser
     Scaffold(
         bottomBar={
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.fillMaxWidth(),
                 ){
-                BottomNavigationBar(link = R.drawable.facebook)
+                BottomNavigationBar(link = user?.photoUrl.toString())
 
             }
                   },
@@ -158,6 +162,7 @@ fun MainScreen(onItemClick :(FilmItemModel)->Unit){
 
     }
 }
+@SuppressLint("ViewModelConstructorInComposable")
 @Composable
 fun MainContent(onItemClick: (FilmItemModel) -> Unit){
     val viewModel = MainViewModel()
