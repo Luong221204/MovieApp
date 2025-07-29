@@ -7,12 +7,13 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
@@ -35,6 +36,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +46,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +55,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -71,7 +75,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.movieapp.Repository.AuthRepository
 import com.example.movieapp.ViewModel.LoginViewModel
 import com.example.movieapp.ViewModel.LoginViewModelFactory
@@ -81,19 +87,14 @@ import com.facebook.FacebookException
 import com.facebook.FacebookSdk
 import com.facebook.login.LoginManager
 import com.facebook.login.widget.LoginButton
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.auth.AuthResult
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+
 
 class LoginActivity : BaseActivity() {
     private lateinit var callbackManager: CallbackManager
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent{
@@ -104,12 +105,17 @@ class LoginActivity : BaseActivity() {
                 this,
                 LoginViewModelFactory(repository, LocalContext.current)
             )[LoginViewModel::class.java]
-
-            LoginScreen(viewModel=viewModel) {
+            LoginScreen(modifier = Modifier.alpha(1f).clickable(enabled = false){}, viewModel=viewModel, activity = this) {
+               // viewModel.increaseNumber()
                 startActivity(Intent(this,MainActivity::class.java))
+            }
+            if(viewModel.isLoginLoading){
+                CircularLoginProcess()
             }
         }
     }
+
+
 }
 
 @Preview
@@ -118,8 +124,12 @@ fun previewLoginScreen(){
 }
 @Composable
 fun LoginScreen(
+    modifier: Modifier,
     context: Context = LocalContext.current,
-    viewModel: LoginViewModel, onLoginClick: () -> Unit,
+    viewModel: LoginViewModel,
+    activity: Activity,
+    onLoginClick: () -> Unit
+
 ){
     val email = viewModel.email
     val password = viewModel.password
@@ -130,16 +140,19 @@ fun LoginScreen(
     LaunchedEffect(loginState) {
         when (loginState) {
             is LoginResult.Success -> {
+                viewModel.onUpdateLoadingLoginStatus()
                 Toast.makeText(context, "Xin chào: ${loginState.user.displayName}", Toast.LENGTH_SHORT).show()
                 onLoginClick()
             }
             is LoginResult.Failure -> {
+                viewModel.onErrorLogin()
                 Toast.makeText(context, "Lỗi: ${loginState.error}", Toast.LENGTH_SHORT).show()
             }
             else -> Unit
         }
     }
     LaunchedEffect(Unit) {
+
         (context as? ComponentActivity)?.activityResultRegistry?.register(
             "facebook_login",
             ActivityResultContracts.StartActivityForResult()
@@ -148,12 +161,17 @@ fun LoginScreen(
         }
 
     }
+    LaunchedEffect(Unit) {
+        viewModel.number2.collect{
+
+        }
+    }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         result.data?.let { viewModel.loginWithGoogle(it) }
     }
     MovieAppTheme{
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .background(color = MovieAppTheme.colorScheme.backGroundColor)
 
@@ -161,10 +179,10 @@ fun LoginScreen(
             Image(painter = painterResource(id = R.drawable.bg1),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.matchParentSize())
+                modifier = modifier.matchParentSize())
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
                     .padding(
@@ -172,110 +190,67 @@ fun LoginScreen(
                         vertical = MovieAppTheme.dimensionValue.verticalPadding
                     )
             ) {
-                Spacer(modifier = Modifier.height(MovieAppTheme.dimensionValue.spacer1*10))
+                Spacer(modifier = modifier.height(MovieAppTheme.dimensionValue.spacer1*10))
                 Image(
                     painter = painterResource(R.drawable.woman),
                     contentDescription = null,
-                    modifier = Modifier
+                    modifier = modifier
                         .size(200.dp)
                 )
-                Spacer(modifier = Modifier.height(MovieAppTheme.dimensionValue.spacer1*4))
+                Spacer(modifier = modifier.height(MovieAppTheme.dimensionValue.spacer1*4))
                 Text(
                     text="Welcome to the mini theater",
-                    modifier = Modifier.width(200.dp),
+                    modifier = modifier.width(200.dp),
                     style = MovieAppTheme.appTypoTheme.buttonTitle,
                     textAlign = TextAlign.Center,
                 )
-                Spacer(modifier = Modifier.height(MovieAppTheme.dimensionValue.spacer1*4))
+                Spacer(modifier = modifier.height(MovieAppTheme.dimensionValue.spacer1*4))
                 Email(
                     email = email,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next)
                 ){
                     viewModel.email=it
                 }
-                Spacer(modifier = Modifier.height(MovieAppTheme.dimensionValue.spacer1*3))
+                Spacer(modifier = modifier.height(MovieAppTheme.dimensionValue.spacer1*3))
                 Password(
                     password =password,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                     coroutineScope = coroutineScope,
                     scrollState = scrollState
                 ){
                     viewModel.password=it
                 }
-                Spacer(modifier = Modifier.height(MovieAppTheme.dimensionValue.spacer1*3))
+                Spacer(modifier = modifier.height(MovieAppTheme.dimensionValue.spacer1*3))
                 Text(
                     text  = "Forgot your password ?",
                     style = MovieAppTheme.appTypoTheme.textFieldOutline.copy(fontSize = 13.sp),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(MovieAppTheme.dimensionValue.spacer1*3))
-                GradientButton(text = "Login",
-                    onClick = onLoginClick,
-                    modifier = Modifier.size(180.dp,50.dp))
+                GradientButton(
+                    text = "Login",
+                    onClickButton = onLoginClick,
+                    modifier = modifier.size(180.dp,50.dp))
                 Spacer(modifier = Modifier.height(MovieAppTheme.dimensionValue.spacer1*3))
                 Row(horizontalArrangement = Arrangement.SpaceAround,
                     modifier = Modifier.width(140.dp)) {
                     OtherWayToLoginButton(
                         text = "Google",
-                        onClick = {
-                            val intent = viewModel.getSignInIntent()
-                            launcher.launch(intent)
-                        },
+                        onClick = { onGoogleButtonClick(viewModel,launcher,activity) },
                         modifier = Modifier.size(MovieAppTheme.dimensionValue.iconSize),
                         resourceImage = R.drawable.google
                     )
                     OtherWayToLoginButton(
                         text = "FaceBook",
                         onClick = {
-                            val activity = context as? Activity
-                            activity?.let{
-                                LoginManager.getInstance().logInWithReadPermissions(
-                                   it,
-                                    listOf("email", "public_profile")
-                                )
-                                LoginManager.getInstance().registerCallback(callbackManager,
-                                    object : FacebookCallback<com.facebook.login.LoginResult> {
-                                        override fun onCancel() {
-                                            Toast.makeText(context, "Đã hủy", Toast.LENGTH_SHORT).show()
-                                        }
-                                        override fun onError(error: FacebookException) {
-                                            Toast.makeText(context, "Lỗi: ${error.message}", Toast.LENGTH_SHORT).show()
-                                        }
-
-                                        override fun onSuccess(result: com.facebook.login.LoginResult) {
-                                            viewModel.loginWithFacebookToken(result.accessToken)
-                                        }
-                                    })
-                            }
-
-                        },
+                            onFacebookButtonClick(viewModel,context,callbackManager)
+                            },
                         modifier = Modifier.size(MovieAppTheme.dimensionValue.iconSize),
                         resourceImage = R.drawable.facebook
                     )
                 }
-                Spacer(modifier = Modifier.height(50.dp))
-                AndroidView(
-                    factory = {
-                        LoginButton(it).apply {
-                            setPermissions("email", "public_profile")
-                            registerCallback(callbackManager, object : FacebookCallback<com.facebook.login.LoginResult> {
-                                override fun onSuccess(result: com.facebook.login.LoginResult) {
-                                    viewModel.loginWithFacebookToken(result.accessToken)
-                                }
-
-                                override fun onCancel() {
-                                    Toast.makeText(it, "Đã hủy", Toast.LENGTH_SHORT).show()
-                                }
-
-                                override fun onError(error: FacebookException) {
-                                    Toast.makeText(it, "Lỗi: ${error.message}", Toast.LENGTH_SHORT).show()
-                                }
-                            })
-                        }
-                    }
-                )
                 Spacer(modifier = Modifier.height(200.dp))
                 Box( modifier = Modifier.fillMaxSize()){
                     Image(painter = painterResource(id = R.drawable.bg1),contentDescription = null, modifier = Modifier.fillMaxSize())
@@ -423,11 +398,11 @@ fun Password(
 @Composable
 fun GradientButton(
     text:String,
-    onClick: ()-> Unit,
+    onClickButton:()-> Unit,
     modifier: Modifier = Modifier
 ){
     Button(
-        onClick=onClick,
+        onClick=  onClickButton ,
         modifier = modifier,
         shape  = RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForButton),
         border = BorderStroke(
@@ -459,32 +434,62 @@ fun OtherWayToLoginButton(
             .clickable(role = Role.Button, onClick = onClick)
         )
 }
-/*
-fun LoginWithGoogle(context: Context){
-        val launcher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)
-            account?.idToken?.let { idToken ->
-                viewModel.firebaseAuthWithGoogle(idToken) { success ->
-                    if (!success) {
-                        Toast.makeText(context, "Đăng nhập thất bại", Toast.LENGTH_SHORT).show()
-                    }
+
+fun onFacebookButtonClick(
+    viewModel:LoginViewModel,
+    context: Context,
+    callbackManager:CallbackManager
+){
+    val activity = context as? Activity
+    activity?.let{
+        LoginManager.getInstance().logInWithReadPermissions(
+            it,
+            listOf("email", "public_profile")
+        )
+        LoginManager.getInstance().registerCallback(callbackManager,
+            object : FacebookCallback<com.facebook.login.LoginResult> {
+                override fun onCancel() {
+                    Toast.makeText(context, "Đã hủy", Toast.LENGTH_SHORT).show()
+                    viewModel.onErrorLogin()
+
                 }
-            }
-        } catch (e: ApiException) {
-            Toast.makeText(context, "Lỗi Google Sign-In: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
+                override fun onError(error: FacebookException) {
+                    Toast.makeText(context, "Lỗi: ${error.message}", Toast.LENGTH_SHORT).show()
+                    viewModel.onErrorLogin()
+                }
+
+                override fun onSuccess(result: com.facebook.login.LoginResult) {
+                    viewModel.loginWithFacebookToken(result.accessToken)
+                }
+            })
     }
+    viewModel.onUpdateLoadingLoginStatus()
+}
+fun onGoogleButtonClick(
+    viewModel:LoginViewModel,
+    launcher:ManagedActivityResultLauncher<Intent,ActivityResult>,
+    activity: Activity
+){
+    val intent = viewModel.getSignInIntent(activity)
+    launcher.launch(intent)
+    viewModel.onUpdateLoadingLoginStatus()
+}
 
-    val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestIdToken(R.string.client_id.toString())
-        .requestEmail()
-        .build()
-    val mGoogleSignInClient = GoogleSignIn.getClient(context, options)
-    val signInIntent = mGoogleSignInClient.signInIntent
-    googleSignInLauncher.launch(signInIntent)
 
-}*/
+@Composable
+fun CircularLoginProcess(){
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Transparent.copy(alpha = 0.5f))
+            .clickable(enabled = false){ }
+    ){
+        CircularProgressIndicator(
+            color = Color.White,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(60.dp)
+                .background(color = Color.Transparent)
+        )
+    }
+}

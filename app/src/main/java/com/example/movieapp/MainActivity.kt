@@ -4,11 +4,13 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.media.Image
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,10 +36,15 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +60,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.example.movieapp.ViewModel.MainViewModel
 import com.example.movieapp.domain.FilmItemModel
 import com.example.movieapp.ui.theme.Black3
@@ -61,6 +70,9 @@ import com.example.movieapp.ui.theme.Pink
 import com.example.movieapp.ui.theme.Red
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -103,14 +115,14 @@ fun Preview(){
 @Composable
 fun MainScreen(onItemClick :(FilmItemModel)->Unit){
     val user=FirebaseAuth.getInstance().currentUser
+    val navController= rememberNavController()
     Scaffold(
         bottomBar={
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.fillMaxWidth(),
                 ){
-                BottomNavigationBar(link = user?.photoUrl.toString())
-
+                BottomNavigationBar(link = user?.photoUrl.toString(),navController)
             }
                   },
         floatingActionButton = {
@@ -148,7 +160,6 @@ fun MainScreen(onItemClick :(FilmItemModel)->Unit){
         paddingValues ->
         Box(
             modifier = Modifier
-                .padding(paddingValues)
                 .background(color =colorResource(R.color.blackBackground))
         ){
             Image(
@@ -157,40 +168,36 @@ fun MainScreen(onItemClick :(FilmItemModel)->Unit){
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
-            MainContent(onItemClick)
+            BottomNavGraph(navController=navController,onItemClick)
         }
 
     }
 }
 @SuppressLint("ViewModelConstructorInComposable")
 @Composable
-fun MainContent(onItemClick: (FilmItemModel) -> Unit){
-    val viewModel = MainViewModel()
-    val upcoming = remember{ mutableStateListOf<FilmItemModel>()}
-    val newMovie = remember{ mutableStateListOf<FilmItemModel>()}
-    var showUpcomingLoading by remember { mutableStateOf(true) }
-    var showNewMovieLoading by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) {
-        viewModel.loadUpcoming().observeForever {
-            upcoming.clear()
-            upcoming.addAll(it)
-            showUpcomingLoading=false
-        }
+fun HomeScreen(onItemClick: (FilmItemModel) -> Unit){
+    val viewModel : MainViewModel= viewModel()
+    val upcoming = viewModel.upcoming
+    val newMovie = viewModel.newMovie
+    val showUpcomingLoading=viewModel.showUpcomingLoading
+    val showNewMovieLoading=viewModel.showNewMovieLoading
+    val upcomingFilmsState by viewModel.loadUpcoming.collectAsState()
+    val newFilmsState by viewModel.loadItems.collectAsState()
+    LaunchedEffect(newFilmsState) {
+        if(viewModel.isFirstNewMovieLoading!=1) viewModel.addNewMovies(newFilmsState)
     }
-    LaunchedEffect(Unit) {
-        viewModel.loadItems().observeForever {
-            newMovie.clear()
-            newMovie.addAll(it)
-            showNewMovieLoading=false
-        }
+
+    LaunchedEffect(upcomingFilmsState) {
+        if(viewModel.isFirstUpcomingLoading !=1 ) viewModel.addUpcomingMovies(upcomingFilmsState)
     }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(top = 40.dp,bottom=0.dp)
     ) {
-        SearchBar(hint = "Search ..")
+        SearchBar(hint = "")
         SectionTitle("New Movies")
         if(showNewMovieLoading){
             Box(
@@ -240,3 +247,4 @@ fun SectionTitle(title:String){
         modifier = Modifier.padding(start = 16.dp,top = 16.dp,bottom = 8.dp)
     )
 }
+fun cong():Int{ return 10}

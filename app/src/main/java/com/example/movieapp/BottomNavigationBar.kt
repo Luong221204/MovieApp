@@ -1,6 +1,7 @@
 package com.example.movieapp
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -37,17 +38,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHost
 import coil.compose.AsyncImage
 import org.jetbrains.annotations.Async
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
-fun BottomNavigationBar(link: String?=null){
+fun BottomNavigationBar(link: String?=null,navController:NavHostController){
     val contextForToast= LocalContext.current.applicationContext
     var selectedItem by remember{
         mutableStateOf("Home")
     }
     val bottomMenuItemsList= prepareBottomMenu(link,selectedItem)
-
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination =navBackStackEntry?.destination
     BottomAppBar(
         cutoutShape = CircleShape,
         contentColor = colorResource(id = R.color.white),
@@ -70,9 +78,18 @@ fun BottomNavigationBar(link: String?=null){
                 )
             }
             BottomNavigationItem(
-                selected = (selectedItem==bottomMenuItem.label),
+                selected = currentDestination?.hierarchy?.any{
+                    it.route == bottomMenuItem.route
+                }==true,
                 onClick = {
                     selectedItem=bottomMenuItem.label
+                    navController.navigate(bottomMenuItem.route){
+                        popUpTo(navController.graph.findStartDestination().id){
+                            saveState=true
+                        }
+                        launchSingleTop=true
+                        restoreState = true
+                    }
                 },
                 icon={
                     if(bottomMenuItem.link != null){
@@ -84,11 +101,11 @@ fun BottomNavigationBar(link: String?=null){
                                 .height(30.dp)
                                 .width(30.dp)
                                 .clip(CircleShape)
-                                .customBottomItem(bottomMenuItem.checked,)
+                                .customBottomItem(bottomMenuItem.isChecked(selectedItem),)
                         )
                     }else{
                         Icon(
-                            painter = bottomMenuItem.icon,
+                            painter = painterResource( bottomMenuItem.icon),
                             contentDescription = bottomMenuItem.label,
                             modifier = Modifier
                                 .height(20.dp)
@@ -100,49 +117,60 @@ fun BottomNavigationBar(link: String?=null){
                 alwaysShowLabel = true,
                 enabled = true,
                 selectedContentColor = Color.Blue,
-                unselectedContentColor = Color.White
+                unselectedContentColor = Color.White,
             )
         }
     }
 }
-data class BottomMenuItem(
+sealed class BottomMenuItem(
     val label:String,
-    val icon:Painter,
-    val link:String?=null,
-    var selectedItem:String
+    val icon:Int,
+    var link:String?=null,
+    private var selectedItem :String?=null,
+    val route:String,
 ){
-    var checked=selectedItem==label
+    data object HomeScreen :BottomMenuItem(
+        label = "Home",
+        icon =  R.drawable.btn_1,
+        route="home"
+    )
+    data object ProfileScreen:BottomMenuItem(
+        label = "Profile",
+        icon = R.drawable.btn_2,
+        route="profile"
+    )
+    data object SupportScreen:BottomMenuItem(
+        label = "Support",
+        icon = R.drawable.btn_3,
+        route="support"
+    )
+    data object SettingScreen:BottomMenuItem(
+        label = "Settings",
+        icon = R.drawable.btn_4,
+        route="settings"
+    )
+    fun setSelectedItem(selectedItem: String):BottomMenuItem{
+        this.selectedItem=selectedItem
+        return this
+    }
+    fun setProfileAvatar(link:String?=null):BottomMenuItem{
+        this.link=link
+        return this
+    }
+    fun isChecked(selectedItem: String):Boolean{
+        return this.label==selectedItem
+    }
 }
 
 
 
 @Composable
-fun prepareBottomMenu( link:String? = null,selectedItem:String):List<BottomMenuItem>{
+fun prepareBottomMenu( link:String? = null,selectedItem:String=BottomMenuItem.HomeScreen.label):List<BottomMenuItem>{
     return listOf(
-        BottomMenuItem(
-            label = "Home",
-            icon = painterResource(id = R.drawable.btn_1),
-            selectedItem = selectedItem
-        ),
-        BottomMenuItem(
-            label = "Profile",
-            icon = painterResource(id = R.drawable.btn_2),
-            selectedItem = selectedItem
-
-        ),
-        BottomMenuItem(
-            label = "Support",
-            icon = painterResource(id = R.drawable.btn_3),
-            selectedItem = selectedItem
-
-        ), BottomMenuItem(
-            label = "Settings",
-            icon = painterResource(id = R.drawable.btn_4),
-            link,
-            selectedItem = selectedItem
-
-        )
-
+        BottomMenuItem.HomeScreen.setSelectedItem(selectedItem),
+        BottomMenuItem.SettingScreen.setSelectedItem(selectedItem),
+        BottomMenuItem.SupportScreen.setSelectedItem(selectedItem),
+        BottomMenuItem.ProfileScreen.setSelectedItem(selectedItem).setProfileAvatar(link),
     )
 }
 
