@@ -34,30 +34,8 @@ class DetailMovieRepository(private val filmItemModel: FilmItemModel) {
                 result->
                 val listFilm : ArrayList<FilmItemModel> = ArrayList()
                 for(document in result){
-                    val film =FilmItemModel()
-                    val movieFilter = document.toObject(FilmItemModelFilter::class.java)
-                    val listCast : ArrayList<CastModel> = ArrayList()
-                    for(castRef in movieFilter.Casts){
-                        castRef.get().addOnSuccessListener {
-                            val cast = it.toObject(CastModel::class.java)
-                            cast?.let{
-                                listCast.add(cast)
-                            }
-                        }
-                    }
-                    film.apply{
-                        Title=movieFilter.Title
-                        Time=movieFilter.Time
-                        Description=movieFilter.Description
-                        Casts.addAll(movieFilter.CastsAfterFilter)
-                        this.Genre=movieFilter.Genre
-                        this.Imdb=movieFilter.Imdb
-                        this.Poster=movieFilter.Poster
-                        this.Year=movieFilter.Year
-                        this.Gallery=movieFilter.Gallery
-                        this.Trailer=movieFilter.Trailer
-                    }
-                    listFilm.add(film)
+                    val movieFilter = document.toObject(FilmItemModel::class.java)
+                    listFilm.add(movieFilter)
                 }
                 _searchedFilms.value=listFilm
             }
@@ -78,6 +56,7 @@ class DetailMovieRepository(private val filmItemModel: FilmItemModel) {
                                 result->
                                 val actor = result.toObject(CastModel::class.java)
                                 if (actor != null) {
+                                    actor.id=result.id
                                     list.add(actor)
                                 }
                                 _casts.value=list

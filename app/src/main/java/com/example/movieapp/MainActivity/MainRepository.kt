@@ -46,35 +46,9 @@ class MainRepository  {
             .addOnSuccessListener { result ->
                 val listFilms:ArrayList<FilmItemModel> = ArrayList()
                 for (document in result) {
-                    val movieFilter = document.toObject(FilmItemModelFilter::class.java)
-                    val movie =FilmItemModel()
-                    for (castRef in movieFilter.Casts) {
-                        val list : ArrayList<CastModel> = ArrayList()
-                        castRef.get().addOnSuccessListener {
-                            castSnap: DocumentSnapshot ->
-                            val cast = castSnap.toObject(
-                                CastModel::class.java
-                            )
-                            cast?.let { list.add(cast)
-                            }
-                        }
-                        movieFilter.CastsAfterFilter.addAll(list)
-                        movie.apply {
-                            id=document.id
-                            Title=movieFilter.Title
-                            Time=movieFilter.Time
-                            Description=movieFilter.Description
-                            Casts.addAll(list)
-                            this.Genre=movieFilter.Genre
-                            this.Imdb=movieFilter.Imdb
-                            this.Poster=movieFilter.Poster
-                            this.Year=movieFilter.Year
-                            this.Gallery=movieFilter.Gallery
-                            this.Trailer=movieFilter.Trailer
-                        }
-                    }
-
+                    val movie = document.toObject(FilmItemModel::class.java)
                     movie.let {
+                        movie.id=document.id
                         listFilms.add(movie)
                     }
                     _newMovies.value=listFilms
@@ -95,40 +69,17 @@ class MainRepository  {
                 for(document in result){
                     val out = document.toObject(Outstanding::class.java)
                     out.id?.get()?.addOnSuccessListener {
-                        val movieFilter = it.toObject(FilmItemModelFilter::class.java)
-                        val movie:FilmItemModel =FilmItemModel()
-                        if (movieFilter != null) {
-                            val listCasts:ArrayList<CastModel> = ArrayList()
-                            for (castRef in movieFilter.Casts) {
-                                castRef.get().addOnSuccessListener { castSnap: DocumentSnapshot ->
-                                    val cast = castSnap.toObject(
-                                        CastModel::class.java
-                                    )
-                                    cast?.let { listCasts.add(cast) }
-                                }
-                            }
-                            movieFilter.CastsAfterFilter.addAll(listCasts)
-                            movie.apply {
-                                Title=movieFilter.Title
-                                Time=movieFilter.Time
-                                Description=movieFilter.Description
-                                Casts.addAll(movieFilter.CastsAfterFilter)
-                                this.Genre=movieFilter.Genre
-                                this.Imdb=movieFilter.Imdb
-                                this.Poster=movieFilter.Poster
-                                this.Year=movieFilter.Year
-                                this.Gallery=movieFilter.Gallery
-                                this.Trailer=movieFilter.Trailer
-
-                            }
+                        val movie = it.toObject(FilmItemModel::class.java)
+                        if (movie != null) {
+                            movie.id=document.id
                             lists.add(movie)
+                        }
                             _outstandingMovie.value=lists
 
                         }
                     }
                 }
             }
-    }
 
     private fun getUpComingMovies(){
         firestore.collection("Movies")
@@ -136,35 +87,9 @@ class MainRepository  {
             .addOnSuccessListener { result ->
                 val listFilms:ArrayList<FilmItemModel> = ArrayList()
                 for (document in result) {
-                    val movieFilter = document.toObject(FilmItemModelFilter::class.java)
-                    val movie =FilmItemModel()
-                    for (castRef in movieFilter.Casts) {
-                        val list : ArrayList<CastModel> = ArrayList()
-                        castRef.get().addOnSuccessListener {
-                                castSnap: DocumentSnapshot ->
-                            val cast = castSnap.toObject(
-                                CastModel::class.java
-                            )
-                            cast?.let { list.add(cast)
-                            }
-                        }
-                        movieFilter.CastsAfterFilter.addAll(list)
-                        movie.apply {
-                            id=document.id
-                            Title=movieFilter.Title
-                            Time=movieFilter.Time
-                            Description=movieFilter.Description
-                            Casts.addAll(list)
-                            this.Genre=movieFilter.Genre
-                            this.Imdb=movieFilter.Imdb
-                            this.Poster=movieFilter.Poster
-                            this.Year=movieFilter.Year
-                            this.Gallery=movieFilter.Gallery
-                            this.Trailer=movieFilter.Trailer
-                        }
-                    }
-
+                    val movie = document.toObject(FilmItemModel::class.java)
                     movie.let {
+                        movie.id=document.id
                         listFilms.add(movie)
                     }
                     _upcomingMovies.value=listFilms

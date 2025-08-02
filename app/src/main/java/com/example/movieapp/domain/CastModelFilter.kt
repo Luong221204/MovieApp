@@ -4,7 +4,8 @@ import com.example.movieapp.domain.FilmItemModel.FilmItemModel
 import com.google.firebase.firestore.DocumentReference
 import java.io.Serializable
 
-data class CastModel(
+
+data class CastModelFilter(
     var PicUrl:String = "",
     var Actor:String = "",
     var Bio:String="",
@@ -12,6 +13,6 @@ data class CastModel(
     var Nationality:String="",
     var Top:Int=-1,
     var Gallery:ArrayList<String> = ArrayList(),
-    var Movies:ArrayList<FilmItemModel> = ArrayList(),
+    var Films:ArrayList<DocumentReference> = ArrayList(),
     var id:String=""
 ): Serializable

@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -55,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.movieapp.MainActivity.SectionTitle
@@ -63,28 +65,31 @@ import com.example.movieapp.domain.CastModel
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
 import kotlinx.coroutines.launch
 
-
-enum class TabLayouts(
+sealed class TabLayoutItem(
     val title:String
-) {
-   MoreLikeThis(
-       title = "More like this"
-   ),
-    About(
-        title = "About"
-    ),
+){
+    data object MoreLikeThis : TabLayoutItem( title = "More like this")
+    data object About : TabLayoutItem( title = "About")
+    data object Comment : TabLayoutItem( title = "Comment")
+    data object Filmography : TabLayoutItem( title = "Filmography")
+    data object Biography : TabLayoutItem( title = "Biography")
+
 
 }
 
+
 @Composable
-fun TabLayout(modifier: Modifier,viewmodel: DetailMovieViewmodel){
+fun TabLayout(
+    modifier: Modifier,
+    viewmodel: ViewModel?,
+    listTabs:List<TabLayoutItem>,
+    setUpTabLayouts:@Composable (ViewModel?,Int)->Unit
+){
     val scope= rememberCoroutineScope()
-    val searchedFilm = viewmodel.searchedFilm.collectAsState()
-    val pagerState = rememberPagerState(pageCount = {TabLayouts.entries.size})
+    val pagerState = rememberPagerState(pageCount = {listTabs.size})
     val selectedTabIndex = remember {
         derivedStateOf { pagerState.currentPage }
     }
-    val cast=viewmodel.listCasts.collectAsState()
     Scaffold(
         modifier = modifier
     ){
@@ -100,7 +105,8 @@ fun TabLayout(modifier: Modifier,viewmodel: DetailMovieViewmodel){
                     .fillMaxWidth()
                     .background(color = colorResource(R.color.blackBackground))
                     .padding(horizontal = 16.dp),
-                indicator = { tabPositions ->
+                indicator = {
+                    tabPositions ->
                     TabRowDefaults.Indicator(
                         Modifier
                             .tabIndicatorOffset(tabPositions[selectedTabIndex.value]),
@@ -109,7 +115,7 @@ fun TabLayout(modifier: Modifier,viewmodel: DetailMovieViewmodel){
                     )
                 }
             ) {
-                TabLayouts.entries.forEachIndexed{
+                listTabs.forEachIndexed{
                     index,currentTab->
                     Tab(
                         selected = selectedTabIndex.value == index,
@@ -117,7 +123,7 @@ fun TabLayout(modifier: Modifier,viewmodel: DetailMovieViewmodel){
                         unselectedContentColor = Color.White.copy(alpha = 0.1f),
                         onClick = {
                             scope.launch {
-                                pagerState.animateScrollToPage(currentTab.ordinal)
+                                pagerState.animateScrollToPage(index)
                             }
                         },
                         text = {Text(text = currentTab.title , style = TextStyle(
@@ -134,162 +140,8 @@ fun TabLayout(modifier: Modifier,viewmodel: DetailMovieViewmodel){
                     .background(color = colorResource(R.color.blackBackground))
             ) {
                 page->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.TopStart
-                ) {
-                    when(page){
-                        0-> Column {
-                            MoreLikeThis(searchedFilm.value)
-                        }
-                        1-> Column {
-                            Spacer(modifier=Modifier.height(24.dp))
-                            About(cast.value,viewmodel.filmItemModel.Gallery)
-                        }
-                    }
-
-                }
+                setUpTabLayouts(viewmodel,page)
             }
         }
     }
-}
-@Composable
-fun MoreLikeThis(list:List<FilmItemModel>){
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp)
-    ) {
-        for(element in list){
-            item {
-                FilmItem(element)
-            }
-        }
-
-    }
-
-}
-
-@Composable
-fun About(list:List<CastModel>,listLinks:List<String>){
-    Column(
-    ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            text = "Casts and crew",
-            style= TextStyle(
-                color = Color.White,
-                fontSize = 15.sp,
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.Bold
-            )
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            for(i in list.indices){
-                item{
-                    Cast(list[i])
-                }
-            }
-        }
-        SectionTitle("Gallery")
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            for (i in listLinks.indices){
-                item {
-                    Gallery(listLinks[i])
-
-                }
-            }
-        }
-    }
-
-}
-
-
-
-@Composable
-fun Cast(castModel: CastModel){
-    Row(
-        modifier = Modifier.height(80.dp).width(150.dp),
-        verticalAlignment = Alignment.CenterVertically
-        ,horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        AsyncImage(
-            model = castModel.PicUrl,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .clip(shape = CircleShape)
-                .width(70.dp)
-                .height(70.dp)
-        )
-        Text(
-            text = castModel.Actor,
-            maxLines = 3,
-            style = TextStyle(
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 12.sp,
-                lineHeight = 16.sp,
-                fontFamily = FontFamily.SansSerif,
-                color = Color.White.copy(alpha = 0.8f),
-            ),
-        )
-    }
-}
-@Composable
-fun FilmItem(filmItemModel: FilmItemModel){
-    Box(modifier = Modifier
-        .height(230.dp)
-        .width(120.dp)
-        .clip(shape = RoundedCornerShape(10.dp))) {
-        AsyncImage(
-            model = filmItemModel.Poster,
-            contentScale = ContentScale.Crop,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize()
-        )
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(12.dp)
-                .align(Alignment.TopStart)
-                .height(20.dp)
-                .width(50.dp)
-                .clip(shape = RoundedCornerShape(5.dp))
-                .background(
-                    color = Color.Red.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(5.dp)
-                )
-        ) {
-            Image(
-                painter = painterResource(R.drawable.imdb),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .height(10.dp)
-                    .width(20.dp)
-                    .clip(shape = RoundedCornerShape(2.dp))
-            )
-            Text(text = "${filmItemModel.Imdb}", style = TextStyle(fontSize = 8.sp, color = Color.White))
-        }
-    }
-}
-@Composable
-fun Gallery(link:String){
-    AsyncImage(
-        model = link,
-        contentScale=ContentScale.Crop,
-        modifier = Modifier
-            .clip(shape = RoundedCornerShape(10.dp))
-            .height(105.dp).aspectRatio(15/9f),
-        contentDescription = null
-    )
 }
