@@ -1,4 +1,4 @@
-package com.example.movieapp.screens
+package com.example.movieapp.MainActivity.screens
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

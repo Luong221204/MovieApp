@@ -1,9 +1,8 @@
-package com.example.movieapp.ViewModel
+package com.example.movieapp
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.movieapp.Repository.AuthRepository
 
 class LoginViewModelFactory(
     private val repository: AuthRepository,

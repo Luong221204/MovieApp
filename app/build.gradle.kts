@@ -85,6 +85,8 @@ dependencies {
     implementation(kotlin("script-runtime"))
     implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
 
+
+
     implementation("com.github.bumptech.glide:glide:4.13.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("io.coil-kt:coil-compose:2.2.2")
@@ -96,6 +98,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 
 
+    implementation ("com.google.firebase:firebase-firestore-ktx:24.11.0")
     //facebook login
     implementation ("com.facebook.android:facebook-login:[8.1.0]")
     implementation ("com.facebook.android:facebook-android-sdk:16.0.1")

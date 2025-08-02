@@ -6,6 +6,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -17,11 +18,11 @@ import com.example.movieapp.ui.theme.*
 data class AppTypoTheme(
     var buttonTitle: TextStyle = TextStyle(
         fontSize = 22.sp,
-        fontWeight = FontWeight.Bold,
-        color = Color.White
+        color = Color.White, fontFamily = FontFamily.Serif
     ),
     var textFieldTitle :TextStyle = TextStyle(
-        color = Color.White
+        color = Color.White,
+        fontFamily = FontFamily.Serif
     ),
     var textRecommend :TextStyle = TextStyle(
         fontSize = 20.sp,
@@ -32,11 +33,13 @@ data class AppTypoTheme(
     var textFieldOutline :TextStyle =TextStyle(
         color = Color.White,
         fontSize = 16.sp,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
+        fontFamily = FontFamily.Serif
     ),
     var textStyleForSearch :TextStyle =TextStyle(
         color = Color.White,
         fontSize = 16.sp,
+        fontFamily = FontFamily.Serif
     ),
 
 )
@@ -60,6 +63,8 @@ data class ColorScheme(
     )
 data class DimensionValue(
     var borderWidthForButton: Dp = 3.dp,
+    var borderWidthForTag: Dp = 1.dp,
+
     var roundCornerForButton: Dp = 50.dp,
     var horizontalPadding:Dp = 32.dp,
     var verticalPadding:Dp = 16.dp,

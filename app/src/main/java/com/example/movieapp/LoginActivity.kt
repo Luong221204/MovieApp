@@ -4,16 +4,13 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
@@ -46,7 +43,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,22 +70,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import com.example.movieapp.Repository.AuthRepository
-import com.example.movieapp.ViewModel.LoginViewModel
-import com.example.movieapp.ViewModel.LoginViewModelFactory
+import com.example.movieapp.MainActivity.MainActivity
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
 import com.facebook.FacebookSdk
 import com.facebook.login.LoginManager
-import com.facebook.login.widget.LoginButton
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
@@ -107,7 +95,7 @@ class LoginActivity : BaseActivity() {
             )[LoginViewModel::class.java]
             LoginScreen(modifier = Modifier.alpha(1f).clickable(enabled = false){}, viewModel=viewModel, activity = this) {
                // viewModel.increaseNumber()
-                startActivity(Intent(this,MainActivity::class.java))
+                startActivity(Intent(this, MainActivity::class.java))
             }
             if(viewModel.isLoginLoading){
                 CircularLoginProcess()
@@ -364,7 +352,8 @@ fun Password(
         trailingIcon = {
             Icon(
                 painter = painterResource(
-                    id = if(isShowPassword) R.drawable.hide else R.drawable.show ),
+                    id = if(isShowPassword) R.drawable.hide else R.drawable.show
+                ),
                 contentDescription = null,
                 modifier = Modifier
                     .size(24.dp)
@@ -436,7 +425,7 @@ fun OtherWayToLoginButton(
 }
 
 fun onFacebookButtonClick(
-    viewModel:LoginViewModel,
+    viewModel: LoginViewModel,
     context: Context,
     callbackManager:CallbackManager
 ){
@@ -466,7 +455,7 @@ fun onFacebookButtonClick(
     viewModel.onUpdateLoadingLoginStatus()
 }
 fun onGoogleButtonClick(
-    viewModel:LoginViewModel,
+    viewModel: LoginViewModel,
     launcher:ManagedActivityResultLauncher<Intent,ActivityResult>,
     activity: Activity
 ){

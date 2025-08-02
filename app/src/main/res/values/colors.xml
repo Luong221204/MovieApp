@@ -10,6 +10,8 @@
     <color name="blackBackground">#19191b</color>
     <color name="black1">#fc19191b</color>
     <color name="black2">#1b19191b</color>
+    <color name="black5">#1d19191b</color>
+
     <color name="black3">#282f32</color>
     <color name="black4">#00282f32</color>
     <color name="gray">#34e3c4</color>

@@ -1,9 +1,8 @@
-package com.example.movieapp.ViewModel
+package com.example.movieapp.DetailFimActivity.Viewmodel
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.media3.common.Player
 
 class PlayMovieFactory constructor(
     val context: Context

@@ -1,9 +1,7 @@
-package com.example.movieapp.ViewModel
+package com.example.movieapp.DetailFimActivity.Viewmodel
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
-import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player

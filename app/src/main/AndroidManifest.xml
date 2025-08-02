@@ -16,6 +16,9 @@
         android:theme="@style/Theme.MovieApp"
         tools:targetApi="31">
         <activity
+            android:name=".MainActivity.MainActivity"
+            android:exported="false" />
+        <activity
             android:name=".PlayMovieActivity"
             android:exported="false" />
         <activity
@@ -30,7 +33,7 @@
             android:value="@string/facebook_client_token" />
 
         <activity
-            android:name=".DetailMovieActivity"
+            android:name=".DetailFimActivity.DetailMovieActivity"
             android:exported="false" />
         <activity
             android:name=".BaseActivity"
@@ -39,10 +42,10 @@
             android:name=".LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".SplashActivity.SplashActivity"
             android:exported="false" />
         <activity
-            android:name=".SplashActivity"
+            android:name=".CastPackage.CastActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.MovieApp">

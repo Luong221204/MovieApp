@@ -1,11 +1,9 @@
-package com.example.movieapp
+package com.example.movieapp.SplashActivity
 
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,35 +27,24 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
+import com.example.movieapp.BaseActivity
+import com.example.movieapp.LoginActivity
+import com.example.movieapp.MovieAppTheme
+import com.example.movieapp.R
 
 class SplashActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,7 +52,7 @@ class SplashActivity : BaseActivity() {
         setContent{
             //IntroScreenPreview()
             IntroScreen {
-                startActivity(Intent(this,LoginActivity::class.java))
+                startActivity(Intent(this, LoginActivity::class.java))
             }
         }
     }
@@ -138,7 +125,7 @@ fun HeaderSection() {
             Spacer (modifier=Modifier.height(MovieAppTheme.dimensionValue.spacer1*4))
             Text(
                 text = "Download and watch offline\nwherever you are",
-                style=MovieAppTheme.appTypoTheme.textFieldTitle.copy(textAlign = TextAlign.Center, fontSize = 18.sp, color = Color.White.copy(alpha = 0.5f))
+                style= MovieAppTheme.appTypoTheme.textFieldTitle.copy(textAlign = TextAlign.Center, fontSize = 18.sp, color = Color.White.copy(alpha = 0.5f))
             )
         }
     }
