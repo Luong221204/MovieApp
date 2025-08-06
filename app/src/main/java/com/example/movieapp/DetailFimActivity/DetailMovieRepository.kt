@@ -35,6 +35,7 @@ class DetailMovieRepository(private val filmItemModel: FilmItemModel) {
                 val listFilm : ArrayList<FilmItemModel> = ArrayList()
                 for(document in result){
                     val movieFilter = document.toObject(FilmItemModel::class.java)
+                    movieFilter.id=document.id
                     listFilm.add(movieFilter)
                 }
                 _searchedFilms.value=listFilm
@@ -62,7 +63,6 @@ class DetailMovieRepository(private val filmItemModel: FilmItemModel) {
                                 _casts.value=list
                             }
                         }
-
                     }
                 }
             }

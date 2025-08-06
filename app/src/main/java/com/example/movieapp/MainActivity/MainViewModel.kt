@@ -17,12 +17,14 @@ import kotlinx.coroutines.launch
 class MainViewModel : ViewModel() {
     private val repository = MainRepository()
 
+    var isShowBottomSheet by mutableStateOf(false)
     var isFirstUpcomingLoading by mutableIntStateOf(0)
     var isFirstNewMovieLoading by mutableIntStateOf(0)
     var isFirstOutstandingMovieLoading by mutableIntStateOf(0)
     var isFirstCategoryLoading by mutableIntStateOf(0)
     var imageOnTop by mutableStateOf("")
     var index by mutableIntStateOf(0)
+    var tag by mutableStateOf("")
 
     //list
     val upcoming =  mutableStateListOf<FilmItemModel>()
@@ -89,6 +91,15 @@ class MainViewModel : ViewModel() {
     fun changeImageOnTop(link:String,i:Int){
         imageOnTop=link
         index=i
+    }
+
+    fun onOpenStatusBottomSheet(data:String){
+        isShowBottomSheet=true
+        tag=data
+    }
+
+    fun onCloseStatusBottomSheet(){
+        isShowBottomSheet=false
     }
 
 }

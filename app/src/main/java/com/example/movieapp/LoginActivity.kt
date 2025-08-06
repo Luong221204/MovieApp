@@ -62,6 +62,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -72,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import com.example.movieapp.MainActivity.MainActivity
+import com.example.movieapp.ui.theme.MovieAppTheme
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
@@ -94,7 +96,6 @@ class LoginActivity : BaseActivity() {
                 LoginViewModelFactory(repository, LocalContext.current)
             )[LoginViewModel::class.java]
             LoginScreen(modifier = Modifier.alpha(1f).clickable(enabled = false){}, viewModel=viewModel, activity = this) {
-               // viewModel.increaseNumber()
                 startActivity(Intent(this, MainActivity::class.java))
             }
             if(viewModel.isLoginLoading){
@@ -330,7 +331,7 @@ fun Password(
         singleLine = true,
         textStyle = TextStyle(
             color = Color.White,
-            textAlign = TextAlign.Start
+            textAlign = TextAlign.Start,
         ),
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = MovieAppTheme.colorScheme.focusedBorderColor,

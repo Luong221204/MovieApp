@@ -2,13 +2,9 @@ package com.example.movieapp.DetailFimActivity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,8 +29,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -49,8 +48,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
@@ -59,10 +56,12 @@ import com.example.movieapp.BaseActivity
 import com.example.movieapp.CastPackage.CastActivity
 import com.example.movieapp.MainActivity.SectionTitle
 import com.example.movieapp.MainActivity.Tag
+import com.example.movieapp.GenreBottom.OnShowBottomSheet
 import com.example.movieapp.R
 import com.example.movieapp.domain.CastModel
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
 import com.example.movieapp.domain.FilmItemModel.Trailer
+import kotlinx.coroutines.launch
 
 class DetailMovieActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,7 +72,7 @@ class DetailMovieActivity : BaseActivity() {
             DetailMovieFactory(filmItem)
         )[DetailMovieViewmodel::class.java]
         setContent {
-            DetailMovieScreen(viewmodel, onBackClick = { finish() }){
+            DetailMovieScreen(viewmodel, onBackClick = { finish()}, onFilmClick = ::onFilmClick){
                 castModel->
                 val intent = Intent(this,CastActivity::class.java)
                 intent.putExtra("cast",castModel)
@@ -81,11 +80,36 @@ class DetailMovieActivity : BaseActivity() {
             }
         }
     }
+    private fun onFilmClick(filmItemModel: FilmItemModel){
+        val intent= Intent(this, DetailMovieActivity::class.java)
+        intent.putExtra("object",filmItemModel)
+        startActivity(intent)
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit , onCastClick :(CastModel)->Unit) {
+fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit, onFilmClick: (FilmItemModel) -> Unit, onCastClick :(CastModel)->Unit) {
     val scrollState = rememberScrollState()
+
+    val coroutineScope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState()
+    val isShowBottomSheet = viewmodel.isShowBottomSheet
+    val showBottomSheet:(String)->Unit ={
+        data->
+        coroutineScope.launch {
+            sheetState.show()
+        }.invokeOnCompletion { viewmodel.onOpenStatusBottomSheet(data) }
+    }
+    val hideBottomSheet:()->Unit ={
+        coroutineScope.launch {
+            sheetState.hide()
+        }.invokeOnCompletion { viewmodel.onCloseStatusBottomSheet() }
+    }
+
+    val tag =viewmodel.tag
+
+    OnShowBottomSheet(tag,isShowBottomSheet,sheetState,hideBottomSheet)
     val film = viewmodel.filmItemModel
     Box(
         modifier = Modifier
@@ -105,7 +129,7 @@ fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit ,
                     contentDescription = null,
                     modifier = Modifier
                         .padding(start = 16.dp, top = 64.dp)
-                        .size(35.dp)
+                        .size(32.dp)
                         .clickable { onBackClick() }
                 )
                 Image(
@@ -113,7 +137,7 @@ fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit ,
                     contentDescription = null,
                     modifier = Modifier
                         .padding(end = 16.dp, top = 64.dp)
-                        .size(35.dp)
+                        .size(32.dp)
                         .align(Alignment.TopEnd)
                 )
                 AsyncImage(
@@ -165,7 +189,7 @@ fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit ,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(film.Genre){
-                        Tag(it)
+                        Tag(showBottomSheet,it)
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -195,7 +219,7 @@ fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit ,
                 ) {
                     when(page){
                         0-> Column {
-                            MoreLikeThis(searchedFilm.value)
+                            MoreLikeThis(searchedFilm.value,onFilmClick)
                         }
                         1-> Column {
                             Spacer(modifier=Modifier.height(24.dp))
@@ -280,25 +304,7 @@ fun Teaser(trailer:Trailer){
         Box(
             modifier = Modifier.weight(1f)
         ){
-            AsyncImage(
-                model = trailer.Image,
-                contentScale=ContentScale.Crop,
-                modifier = Modifier
-                    .alpha(0.7f)
-                    .clip(shape = RoundedCornerShape(10.dp))
-                    .height(105.dp).aspectRatio(15/9f),
-                contentDescription = null
-            )
-            Icon(
-                painter = painterResource(R.drawable.play),
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier
-                    .size(32.dp)
-                    .align(Alignment.Center)
-                    .shadow(elevation = 10.dp)
-                    .padding(end = 8.dp)
-            )
+            Video(trailer.Image)
         }
 
         Box(
@@ -322,6 +328,32 @@ fun Teaser(trailer:Trailer){
     }
 }
 
+
+@Composable
+fun Video(link:String){
+    Box(modifier = Modifier){
+        AsyncImage(
+            model = link,
+            contentScale=ContentScale.Crop,
+            modifier = Modifier
+                .alpha(0.7f)
+                .clip(shape = RoundedCornerShape(10.dp))
+                .height(105.dp).aspectRatio(15/9f),
+            contentDescription = null
+        )
+        Icon(
+            painter = painterResource(R.drawable.play),
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier
+                .size(32.dp)
+                .align(Alignment.Center)
+                .shadow(elevation = 10.dp)
+                .padding(end = 8.dp)
+        )
+    }
+
+}
 fun getListTabLayouts():List<TabLayoutItem>{
     val list:ArrayList<TabLayoutItem> = ArrayList()
     list.add(TabLayoutItem.MoreLikeThis)
@@ -331,7 +363,7 @@ fun getListTabLayouts():List<TabLayoutItem>{
 }
 
 @Composable
-fun MoreLikeThis(list:List<FilmItemModel>){
+fun MoreLikeThis(list:List<FilmItemModel>,onClick: (FilmItemModel) -> Unit){
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -340,7 +372,7 @@ fun MoreLikeThis(list:List<FilmItemModel>){
     ) {
         for(element in list){
             item {
-                FilmItem(element)
+                FilmItem2(element,onClick)
             }
         }
 
@@ -373,7 +405,7 @@ fun About(list:List<CastModel>, listLinks:List<String> , onClick: (CastModel) ->
                 }
             }
         }
-        SectionTitle("Gallery")
+        SectionTitle("Gallery",true,null)
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -381,7 +413,6 @@ fun About(list:List<CastModel>, listLinks:List<String> , onClick: (CastModel) ->
             for (i in listLinks.indices){
                 item {
                     Gallery(listLinks[i])
-
                 }
             }
         }
@@ -420,10 +451,11 @@ fun Cast(castModel: CastModel,onClick: (CastModel) -> Unit){
     }
 }
 @Composable
-fun FilmItem(filmItemModel: FilmItemModel){
+fun FilmItem2(filmItemModel: FilmItemModel,onClick: (FilmItemModel) -> Unit){
     Box(modifier = Modifier
         .height(230.dp)
-        .width(120.dp)
+        .width(180.dp)
+        .clickable { onClick(filmItemModel) }
         .clip(shape = RoundedCornerShape(10.dp))) {
         AsyncImage(
             model = filmItemModel.Poster,
@@ -469,3 +501,4 @@ fun Gallery(link:String){
         contentDescription = null
     )
 }
+

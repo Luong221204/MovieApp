@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BottomAppBar
@@ -32,7 +34,6 @@ import com.example.movieapp.R
 
 @Composable
 fun BottomNavigationBar(link: String?=null,navController:NavHostController){
-    val contextForToast= LocalContext.current.applicationContext
     var selectedItem by remember{
         mutableStateOf("Home")
     }
@@ -41,9 +42,7 @@ fun BottomNavigationBar(link: String?=null,navController:NavHostController){
     val currentDestination =navBackStackEntry?.destination
     BottomAppBar (
         contentColor = colorResource(id = R.color.white),
-        backgroundColor = colorResource(id = R.color.black1),
-
-
+        backgroundColor = colorResource(id = R.color.blackBackground),
     ){
         bottomMenuItemsList.forEachIndexed {
             index,bottomMenuItem ->
@@ -68,8 +67,7 @@ fun BottomNavigationBar(link: String?=null,navController:NavHostController){
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .height(30.dp)
-                                .width(30.dp)
+                                .size(24.dp)
                                 .clip(CircleShape)
                                 .customBottomItem(bottomMenuItem.isChecked(selectedItem),)
                         )
@@ -86,7 +84,7 @@ fun BottomNavigationBar(link: String?=null,navController:NavHostController){
                 },
                 alwaysShowLabel = true,
                 enabled = true,
-                selectedContentColor = Color.Blue,
+                selectedContentColor = Color.Red.copy(alpha = 0.8f),
                 unselectedContentColor = Color.White,
             )
         }
@@ -101,22 +99,22 @@ sealed class BottomMenuItem(
 ){
     data object HomeScreen : BottomMenuItem(
         label = "Home",
-        icon = R.drawable.btn_1,
+        icon = R.drawable.home,
         route="home"
     )
     data object ProfileScreen: BottomMenuItem(
         label = "Profile",
-        icon = R.drawable.btn_2,
+        icon = R.drawable.btn_4,
         route="profile"
     )
     data object SupportScreen: BottomMenuItem(
         label = "Support",
-        icon = R.drawable.btn_3,
+        icon = R.drawable.list,
         route="support"
     )
-    data object SettingScreen: BottomMenuItem(
+    data object ExploreScreen: BottomMenuItem(
         label = "Settings",
-        icon = R.drawable.btn_4,
+        icon =R.drawable.btn_1,
         route="settings"
     )
     fun setSelectedItem(selectedItem: String): BottomMenuItem {
@@ -138,7 +136,7 @@ sealed class BottomMenuItem(
 fun prepareBottomMenu( link:String? = null,selectedItem:String= BottomMenuItem.HomeScreen.label):List<BottomMenuItem>{
     return listOf(
         BottomMenuItem.HomeScreen.setSelectedItem(selectedItem),
-        BottomMenuItem.SettingScreen.setSelectedItem(selectedItem),
+        BottomMenuItem.ExploreScreen.setSelectedItem(selectedItem),
         BottomMenuItem.SupportScreen.setSelectedItem(selectedItem),
         BottomMenuItem.ProfileScreen.setSelectedItem(selectedItem).setProfileAvatar(link),
     )
@@ -153,7 +151,7 @@ fun Modifier.customBottomItem(checked:Boolean):Modifier{
             BorderStroke(
                 width = 2.dp,
                 color =  when(checked){
-                    true->Color.Blue
+                    true->Color.Red.copy(alpha = 0.8f)
                     false->Color.White
                 }
             ),

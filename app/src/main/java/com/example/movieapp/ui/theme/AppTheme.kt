@@ -1,6 +1,5 @@
-package com.example.movieapp
+package com.example.movieapp.ui.theme
 
-import android.widget.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -12,8 +11,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.size.Dimension
-import com.example.movieapp.ui.theme.*
 
 data class AppTypoTheme(
     var buttonTitle: TextStyle = TextStyle(
@@ -38,8 +35,8 @@ data class AppTypoTheme(
     ),
     var textStyleForSearch :TextStyle =TextStyle(
         color = Color.White,
-        fontSize = 16.sp,
-        fontFamily = FontFamily.Serif
+        fontSize = 15.sp,
+        fontFamily = FontFamily.SansSerif
     ),
 
 )
@@ -59,7 +56,7 @@ data class ColorScheme(
     var focusedLabelColor  :Color =Color.White,
     var unfocusedLabelColor  :Color =Color.White,
     var floatingButtonBackgroundColor:Color= Black3,
-    var iconTint :Color = Color.White
+    var iconTint :Color = Color.Red.copy(alpha = 0.8f),
     )
 data class DimensionValue(
     var borderWidthForButton: Dp = 3.dp,
@@ -73,7 +70,7 @@ data class DimensionValue(
     var roundCornerForTextField: Dp = 20.dp,
     var borderWidthForTextField :Dp = 2.dp,
     var iconSize:Dp = 40.dp,
-    var iconSize2:Dp = 24.dp,
+    var iconSize2:Dp = 20.dp,
     var bottomMenuIconSize:Dp = 20.dp,
     var floatingButtonSize:Dp=60.dp,
     )
@@ -96,7 +93,7 @@ fun MovieAppTheme(
     }
 }
 object MovieAppTheme{
-    val appTypoTheme :AppTypoTheme
+    val appTypoTheme : AppTypoTheme
         @Composable
         get() = LocalAppTypo.current
     val colorScheme : ColorScheme

@@ -1,39 +1,52 @@
 package com.example.movieapp.DetailFimActivity
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.movieapp.R
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
 import com.example.movieapp.ui.theme.*
 
 @Composable
 fun FilmItem(item: FilmItemModel, onClick:(FilmItemModel)->Unit){
-    Column(
+    Box(
         modifier = Modifier
             .width(140.dp)
             .clickable {
                 onClick(item)
             }
             .shadow(
-                elevation = 8.dp, // độ đổ bóng
-                shape = RoundedCornerShape(com.example.movieapp.MovieAppTheme.dimensionValue.roundCornerForTextField),
-                clip = false // để bóng không bị cắt bởi clip
+                elevation = 8.dp,
+                shape = RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField),
+                clip = false
             )
-            .border(BorderStroke(width=1.dp, color = Color.Black), shape =RoundedCornerShape(com.example.movieapp.MovieAppTheme.dimensionValue.roundCornerForTextField) )
-            .clip(RoundedCornerShape(com.example.movieapp.MovieAppTheme.dimensionValue.roundCornerForTextField))
+            .border(BorderStroke(width=1.dp, color = Color.Black), shape =RoundedCornerShape(
+                MovieAppTheme.dimensionValue.roundCornerForTextField) )
+            .clip(RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField))
             .background(color = Red)
     ){
         AsyncImage(
@@ -44,5 +57,30 @@ fun FilmItem(item: FilmItemModel, onClick:(FilmItemModel)->Unit){
                 .size(width = 140.dp,height = 200.dp)
                 .background(Color.Gray)
         )
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(12.dp)
+                .align(Alignment.TopStart)
+                .height(20.dp)
+                .width(50.dp)
+                .clip(shape = RoundedCornerShape(5.dp))
+                .background(
+                    color = Color.Red.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(5.dp)
+                )
+        ) {
+            Image(
+                painter = painterResource(R.drawable.imdb),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .height(10.dp)
+                    .width(20.dp)
+                    .clip(shape = RoundedCornerShape(2.dp))
+            )
+            Text(text = "${item.Imdb}", style = TextStyle(fontSize = 8.sp, color = Color.White))
+        }
     }
 }

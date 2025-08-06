@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.movieapp.BaseActivity
 import com.example.movieapp.LoginActivity
-import com.example.movieapp.MovieAppTheme
+import com.example.movieapp.ui.theme.MovieAppTheme
 import com.example.movieapp.R
 
 class SplashActivity : BaseActivity() {

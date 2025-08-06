@@ -35,6 +35,7 @@ class CastRepository(
                                 result->
                             val filmItem = result.toObject(FilmItemModel::class.java)
                             filmItem?.let{
+                                filmItem.id=result.id
                                 list.add(filmItem)
                                 _films.value=list
                             }

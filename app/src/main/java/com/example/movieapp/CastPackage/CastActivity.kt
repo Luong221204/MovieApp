@@ -1,12 +1,11 @@
 package com.example.movieapp.CastPackage
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,13 +23,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,19 +45,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import coil.compose.AsyncImage
-import coil.decode.ImageSource
 import com.example.movieapp.BaseActivity
+import com.example.movieapp.DetailFimActivity.DetailMovieActivity
 import com.example.movieapp.DetailFimActivity.MoreLikeThis
 import com.example.movieapp.DetailFimActivity.TabLayout
 import com.example.movieapp.DetailFimActivity.TabLayoutItem
 import com.example.movieapp.MainActivity.SectionTitle
 import com.example.movieapp.R
 import com.example.movieapp.domain.CastModel
+import com.example.movieapp.domain.FilmItemModel.FilmItemModel
 
 class CastActivity : BaseActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -74,15 +70,20 @@ class CastActivity : BaseActivity() {
                 CastViewmodelFactory(castModel)
             )[CastViewmodel::class.java]
             setContent {
-                CastScreen(viewmodel)
+                CastScreen(viewmodel,::onFilmClick)
             }
         }
+    }
+    private fun onFilmClick(filmItemModel: FilmItemModel){
+        val intent= Intent(this, DetailMovieActivity::class.java)
+        intent.putExtra("object",filmItemModel)
+        startActivity(intent)
     }
 }
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun CastScreen(viewmodel: CastViewmodel){
+fun CastScreen(viewmodel: CastViewmodel,onFilmClick:(FilmItemModel)->Unit){
     Column(
         modifier = Modifier
             .background(color = colorResource(R.color.blackBackground))
@@ -109,7 +110,7 @@ fun CastScreen(viewmodel: CastViewmodel){
                     0->{
                         Column(
                         ) {
-                           MoreLikeThis(listFilm)
+                           MoreLikeThis(listFilm,onFilmClick)
                         }
                     }
                     1->{
@@ -121,7 +122,7 @@ fun CastScreen(viewmodel: CastViewmodel){
                                 lineHeight = 22.sp
                             )
                             Spacer(modifier = Modifier.height(16.dp))
-                            SectionTitle("Gallery")
+                            SectionTitle("Gallery",true,null)
                             Spacer(modifier = Modifier.height(16.dp))
                             LazyRow(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -141,7 +142,6 @@ fun CastScreen(viewmodel: CastViewmodel){
         }
     }
 }
-@Preview
 @Composable
 fun Avatar(castModel: CastModel){
     Box(
@@ -162,7 +162,7 @@ fun Avatar(castModel: CastModel){
             contentDescription = null,
             modifier = Modifier
                 .padding(top = 64.dp, start = 16.dp)
-                .size(35.dp)
+                .size(32.dp)
         )
         Box(
             modifier = Modifier
@@ -193,7 +193,7 @@ fun Biography(modifier: Modifier,castModel: CastModel){
             style = TextStyle(color = Color.White.copy(alpha = 0.8f),
                 fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 26.sp
+                fontSize = 24.sp
             )
         )
         Spacer(modifier = Modifier.height(24.dp))

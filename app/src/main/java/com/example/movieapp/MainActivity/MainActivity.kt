@@ -3,7 +3,6 @@ package com.example.movieapp.MainActivity
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
@@ -15,12 +14,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -33,14 +30,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,7 +52,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -63,12 +62,14 @@ import com.example.movieapp.MainActivity.BottomNavBar.BottomNavGraph
 import com.example.movieapp.MainActivity.BottomNavBar.BottomNavigationBar
 import com.example.movieapp.DetailFimActivity.DetailMovieActivity
 import com.example.movieapp.DetailFimActivity.FilmItem
+import com.example.movieapp.GenreBottom.OnShowBottomSheet
 import com.example.movieapp.R
+import com.example.movieapp.SeeAllPackage.SeeAllActivity
 import com.example.movieapp.domain.Category
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
 import com.example.movieapp.ui.theme.MovieAppTheme
 import com.google.firebase.auth.FirebaseAuth
-import kotlin.reflect.KFunction0
+import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,7 +77,7 @@ class MainActivity : BaseActivity() {
         enableEdgeToEdge()
         setContent {
             MovieAppTheme{
-                MainScreen {
+                MainScreen(::onSeeAllClick) {
                     item->
                     val intent= Intent(this, DetailMovieActivity::class.java)
                     intent.putExtra("object",item)
@@ -86,7 +87,14 @@ class MainActivity : BaseActivity() {
 
         }
     }
+    private fun onSeeAllClick(title: String){
+        val intent = Intent(this,SeeAllActivity::class.java)
+        intent.putExtra("title",title)
+        startActivity(intent)
+    }
 }
+
+
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
@@ -103,42 +111,40 @@ fun GreetingPreview() {
     }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Preview(){
-    MainScreen {  }
-}
-@Composable
-fun MainScreen(onItemClick :(FilmItemModel)->Unit){
+fun MainScreen(onSeeAllClick:(String)->Unit,onItemClick :(FilmItemModel)->Unit){
     val user=FirebaseAuth.getInstance().currentUser
     val navController= rememberNavController()
+
+
     Scaffold(
-        modifier = Modifier.padding(WindowInsets.navigationBars.asPaddingValues()),
-        bottomBar={
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxWidth(),
-                ){
-                BottomNavigationBar(link = user?.photoUrl.toString(),navController)
-            }
+        modifier = Modifier.background(color = colorResource(R.color.blackBackground)).navigationBarsPadding(),
+        bottomBar={BottomNavigationBar(link = user?.photoUrl.toString(),navController)
                   },
         backgroundColor = colorResource(R.color.blackBackground)
         )
     {
         paddingValues ->
         Box(
-            modifier = Modifier
+            modifier = Modifier.fillMaxSize()
                 .background(color =colorResource(R.color.black1))
         ){
 
-            BottomNavGraph(navController=navController,onItemClick)
+            BottomNavGraph(onSeeAllClick,navController=navController,onItemClick)
         }
-
     }
+
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("ViewModelConstructorInComposable")
 @Composable
-fun HomeScreen(onItemClick: (FilmItemModel) -> Unit){
+fun HomeScreen(onSeeAllClick:(String)->Unit,onItemClick: (FilmItemModel) -> Unit){
     val viewModel : MainViewModel = viewModel()
+
+    val scaffoldState=rememberModalBottomSheetState()
+    val coroutineScope= rememberCoroutineScope()
 
     val upcoming = viewModel.upcoming
     val newMovie = viewModel.newMovie
@@ -149,6 +155,7 @@ fun HomeScreen(onItemClick: (FilmItemModel) -> Unit){
     val showNewMovieLoading=viewModel.showNewMovieLoading
     val showOutstandingLoading=viewModel.showOutstandingLoading
     val showCategoryLoading=viewModel.showCategoryLoading
+
 
     val upcomingFilmsState by viewModel.loadUpcoming.collectAsState()
     val newFilmsState by viewModel.loadItems.collectAsState()
@@ -174,6 +181,20 @@ fun HomeScreen(onItemClick: (FilmItemModel) -> Unit){
 
     }
 
+    val isShowBottomSheet = viewModel.isShowBottomSheet
+    val tag =viewModel.tag
+
+    val showBottomSheet:(String)->Unit={
+        data->
+        coroutineScope.launch {
+            scaffoldState.show()
+        }.invokeOnCompletion { viewModel.onOpenStatusBottomSheet(data) }
+    }
+    val hideBottomSheet:()->Unit = {
+        coroutineScope.launch {
+            scaffoldState.hide()
+        }.invokeOnCompletion { viewModel.onCloseStatusBottomSheet() }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -181,9 +202,9 @@ fun HomeScreen(onItemClick: (FilmItemModel) -> Unit){
             .background(color = colorResource(R.color.black2))
     ) {
         ShowItemsOnScreen(showOutstandingLoading){
-            MostOutStanding(viewModel)
+            MostOutStanding(showBottomSheet,viewModel,onItemClick)
         }
-        SectionTitle("New Movies")
+        SectionTitle("New Movies",true, onClick = onSeeAllClick)
 
         ShowItemsOnScreen(showNewMovieLoading){
             LazyRow(
@@ -197,7 +218,7 @@ fun HomeScreen(onItemClick: (FilmItemModel) -> Unit){
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
-        SectionTitle("Upcoming Movies")
+        SectionTitle("Upcoming Movies",true,onSeeAllClick)
         Spacer(modifier = Modifier.height(8.dp))
         ShowItemsOnScreen(showUpcomingLoading){
             LazyRow(
@@ -211,10 +232,11 @@ fun HomeScreen(onItemClick: (FilmItemModel) -> Unit){
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
-        SectionTitle("Categories")
+        SectionTitle("Categories",false,null)
         ShowItemsOnScreen(showCategoryLoading) {
             Categories(categories)
         }
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -222,6 +244,7 @@ fun HomeScreen(onItemClick: (FilmItemModel) -> Unit){
                 .background(color = colorResource(R.color.black1))
         )
     }
+    OnShowBottomSheet(tag,isShowBottomSheet,scaffoldState,hideBottomSheet)
 }
 
 @Composable
@@ -240,7 +263,7 @@ fun ShowItemsOnScreen(showLoading:Boolean, content:@Composable ()-> Unit){
 }
 
 @Composable
-fun SectionTitle(title:String){
+fun SectionTitle(title:String, isDisplay:Boolean, onClick: ((String) -> Unit)?){
     Box(modifier = Modifier
         .padding(horizontal = 16.dp, vertical = 16.dp)
         .fillMaxWidth()){
@@ -248,29 +271,46 @@ fun SectionTitle(title:String){
             style = TextStyle(color = Color.White, fontSize = 15.sp, fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold),
             modifier = Modifier.align(Alignment.TopStart)
         )
-        Text(text = "See all",
-            style = TextStyle(color = colorResource(R.color.purple_500), fontSize = 12.sp, fontFamily = FontFamily.SansSerif),
-            modifier = Modifier.align(Alignment.BottomEnd)
-        )
+        if(isDisplay){
+            Text(
+                text = "See all",
+                style = TextStyle(
+                    color = colorResource(R.color.purple_500),
+                    fontSize = 12.sp,
+                    fontFamily = FontFamily.SansSerif),
+                modifier = Modifier
+                    .clickable {
+                        if (onClick != null) {
+                            onClick(title)
+                        }
+                    }
+                    .align(Alignment.BottomEnd)
+            )
+        }
     }
 
 }
 
 @Composable
-fun Tag(title:String){
+fun Tag(onOpenGenre: ((String) -> Unit)?,title:String){
     Box(
         modifier= Modifier
             .background(
                 color = colorResource(R.color.black2),
-                shape = RoundedCornerShape(com.example.movieapp.MovieAppTheme.dimensionValue.roundCornerForTextField)
+                shape = RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField)
             )
             .border(
                 BorderStroke(
-                    width = com.example.movieapp.MovieAppTheme.dimensionValue.borderWidthForTag,
-                    brush = Brush.linearGradient(colors = com.example.movieapp.MovieAppTheme.colorScheme.linearGradientColorsForButton)
-                ), shape = RoundedCornerShape(com.example.movieapp.MovieAppTheme.dimensionValue.roundCornerForTextField)
+                    width = MovieAppTheme.dimensionValue.borderWidthForTag,
+                    brush = Brush.linearGradient(colors = MovieAppTheme.colorScheme.linearGradientColorsForButton)
+                ), shape = RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField)
             )
-            .clip(shape = RoundedCornerShape(com.example.movieapp.MovieAppTheme.dimensionValue.roundCornerForTextField))
+            .clip(shape = RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField))
+            .clickable {
+                if (onOpenGenre != null) {
+                    onOpenGenre(title)
+                }
+            }
     ){
         Text(
             text=title,
@@ -281,7 +321,7 @@ fun Tag(title:String){
 }
 
 @Composable
-fun MostOutStanding(viewModel: MainViewModel){
+fun MostOutStanding(onOpenGenre: (String) -> Unit,viewModel: MainViewModel,onItemClick: (FilmItemModel) -> Unit){
     val filmItemModel: FilmItemModel=viewModel.outstandingMovie[0]
     val imageOnTop = viewModel.imageOnTop
     val index = viewModel.index
@@ -291,6 +331,7 @@ fun MostOutStanding(viewModel: MainViewModel){
         ) {
             Box(
                 modifier= Modifier
+                    .clickable { onItemClick(filmItemModel) }
                     .height(420.dp)
                     .fillMaxWidth()
             ){
@@ -331,7 +372,7 @@ fun MostOutStanding(viewModel: MainViewModel){
             ){
                 for(i in 0..<filmItemModel.Genre.size){
                     item {
-                        Tag(filmItemModel.Genre[i])
+                        Tag(onOpenGenre,filmItemModel.Genre[i])
                     }
                 }
             }
@@ -433,3 +474,5 @@ fun Category(category: Category){
         )
     }
 }
+
+
