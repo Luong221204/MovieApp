@@ -1,10 +1,16 @@
 package com.example.movieapp.MainActivity
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,12 +54,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
@@ -63,21 +71,65 @@ import com.example.movieapp.MainActivity.BottomNavBar.BottomNavigationBar
 import com.example.movieapp.DetailFimActivity.DetailMovieActivity
 import com.example.movieapp.DetailFimActivity.FilmItem
 import com.example.movieapp.GenreBottom.OnShowBottomSheet
+import com.example.movieapp.LocalDatabase.LocalDAO
+import com.example.movieapp.LocalDatabase.LocalDatabase
+import com.example.movieapp.MainActivity.screens.SupportScreen.SupportRepository
+import com.example.movieapp.MainActivity.screens.SupportScreen.SupportViewmodel
+import com.example.movieapp.MainActivity.screens.SupportScreen.ViewModelFactory
 import com.example.movieapp.R
 import com.example.movieapp.SeeAllPackage.SeeAllActivity
 import com.example.movieapp.domain.Category
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
 import com.example.movieapp.ui.theme.MovieAppTheme
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity() {
+    private lateinit var  supportRepository :SupportRepository
+    private lateinit var supportViewmodel :SupportViewmodel
+    private val exceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
+        Toast.makeText(this,"thất bại",Toast.LENGTH_SHORT).show()
+    }
+    private val scope = CoroutineScope(Dispatchers.IO+exceptionHandler)
+    private val broadcastReceiver = object :BroadcastReceiver(){
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if(intent?.action == "object"){
+                val filmItemModel = intent.getSerializableExtra("object",FilmItemModel::class.java)
+                filmItemModel?.let {
+                    supportViewmodel.convertFilmItemToFilmLocal(
+                        it
+                    )
+                }?.let {
+                    scope.launch {
+                        if(isActive)
+                        supportViewmodel.insertMovie(it)
+                    }
+                }
+            }
+        }
+
+    }
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val filter1 = IntentFilter()
+        filter1.addAction("object")
+        registerReceiver(broadcastReceiver,filter1, RECEIVER_NOT_EXPORTED)
+        supportRepository = SupportRepository(LocalDatabase.getInstance(this).localDao())
+        supportViewmodel  =ViewModelProvider(
+            this,
+            ViewModelFactory(supportRepository)
+        )[SupportViewmodel::class.java]
         setContent {
             MovieAppTheme{
-                MainScreen(::onSeeAllClick) {
+                MainScreen(supportViewmodel,::onSeeAllClick) {
                     item->
                     val intent= Intent(this, DetailMovieActivity::class.java)
                     intent.putExtra("object",item)
@@ -92,8 +144,13 @@ class MainActivity : BaseActivity() {
         intent.putExtra("title",title)
         startActivity(intent)
     }
-}
 
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(broadcastReceiver)
+        scope.cancel()
+    }
+}
 
 
 @Composable
@@ -114,7 +171,7 @@ fun GreetingPreview() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(onSeeAllClick:(String)->Unit,onItemClick :(FilmItemModel)->Unit){
+fun MainScreen(supportViewmodel: SupportViewmodel,onSeeAllClick:(String)->Unit,onItemClick :(FilmItemModel)->Unit){
     val user=FirebaseAuth.getInstance().currentUser
     val navController= rememberNavController()
 
@@ -132,7 +189,7 @@ fun MainScreen(onSeeAllClick:(String)->Unit,onItemClick :(FilmItemModel)->Unit){
                 .background(color =colorResource(R.color.black1))
         ){
 
-            BottomNavGraph(onSeeAllClick,navController=navController,onItemClick)
+            BottomNavGraph(supportViewmodel,onSeeAllClick,navController=navController,onItemClick)
         }
     }
 
@@ -268,7 +325,7 @@ fun SectionTitle(title:String, isDisplay:Boolean, onClick: ((String) -> Unit)?){
         .padding(horizontal = 16.dp, vertical = 16.dp)
         .fillMaxWidth()){
         Text(text = title,
-            style = TextStyle(color = Color.White, fontSize = 15.sp, fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold),
+            style = TextStyle(color = Color.White, fontSize = 18.sp, fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold),
             modifier = Modifier.align(Alignment.TopStart)
         )
         if(isDisplay){
@@ -467,10 +524,11 @@ fun Category(category: Category){
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(bottom = 10.dp, start = 20.dp)
-            , style = TextStyle(color = Color.White,
+            , style = TextStyle(
+                color = Color.White,
                 fontFamily = FontFamily.Monospace,
                 fontSize = 15.sp,
-                )
+            )
         )
     }
 }

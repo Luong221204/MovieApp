@@ -59,7 +59,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterBottomSheet(
-    onHideBottomSheet:()->Unit,
+    onHideBottomSheet:(String,List<String>,String,String)->Unit,
     sheetState: SheetState,
 ){
     val viewModel :FilterBottomViewModel = viewModel()
@@ -103,7 +103,10 @@ fun FilterBottomSheet(
     }
     ModalBottomSheet(
         modifier = Modifier.height(650.dp).fillMaxWidth(),
-        onDismissRequest = onHideBottomSheet ,
+        onDismissRequest = {
+            onHideBottomSheet(currentFilter,viewModel.listGenreSelected,countryState,yearSelected)
+        }
+        ,
         sheetState = sheetState,
         dragHandle = { BottomSheetDefaults.DragHandle(color = Color.Red.copy(alpha = 0.8f)) },
         containerColor = colorResource(R.color.blackBackground)
@@ -136,7 +139,10 @@ fun FilterBottomSheet(
             }
             Spacer(modifier = Modifier.height(4.dp))
             SectionTitle("Genre",false) { }
-            ListGenre(listGenre)
+            ListGenre(listGenre,viewModel.listGenreSelected){
+                isSelected,title->
+                viewModel.onGenreClick(isSelected,title)
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
             Filter("Release",R.drawable.calendar,yearSelected) { showBottomSheet("Release") }
@@ -157,7 +163,9 @@ fun FilterBottomSheet(
                 horizontalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 ApplyButton("Reset", BlackGray) { }
-                ApplyButton("Apply", Color.Red.copy(alpha = 0.8f)) { }
+                ApplyButton("Apply", Color.Red.copy(alpha = 0.8f)) {
+                    onHideBottomSheet(currentFilter,viewModel.listGenreSelected,countryState,yearSelected)
+                }
 
             }
         }
@@ -165,13 +173,16 @@ fun FilterBottomSheet(
 }
 
 @Composable
-fun ListGenre(list: List<String>){
+fun ListGenre(list: List<String>,listGenreSelected:List<String>,onClick: (Boolean,String) -> Unit){
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         items(list){
-            Genre(it) { }
+            Genre(it,listGenreSelected) {
+                isSelected,title
+                ->onClick(isSelected,title)
+            }
         }
     }
 }
@@ -209,14 +220,23 @@ fun ApplyButton(title:String,color: Color,onClick:()->Unit){
     }
 }
 @Composable
-fun Genre(title:String,isSelected:Boolean=false,onClick:()->Unit){
+fun Genre(title:String,listGenreSelected:List<String>,onClick:(Boolean,String)->Unit){
+    var isSelected by remember {
+        mutableStateOf(listGenreSelected.contains(title))
+    }
     Box(
         modifier = Modifier
             .background(color = if(isSelected) Color.Red.copy(alpha = 0.8f)else Color.Transparent,
                 shape = RoundedCornerShape(20.dp))
             .border(BorderStroke(width = 1.dp, color = BlackGray), shape = RoundedCornerShape(20.dp) )
             .clip(shape = RoundedCornerShape(20.dp))
-            .selectable(selected = isSelected, onClick = onClick, role = Role.Checkbox)
+            .selectable(
+                selected = isSelected,
+                onClick = {
+                    isSelected=!isSelected
+                    onClick(isSelected,title)
+                },
+                role = Role.Checkbox)
     ){
         Text(text = title,
             color = Color.White, fontSize = 13.sp, fontFamily = FontFamily.SansSerif,

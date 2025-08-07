@@ -67,6 +67,9 @@ class DetailMovieActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val filmItem: FilmItemModel = (intent.getSerializableExtra("object") as FilmItemModel)
+        val intent = Intent("object")
+        intent.putExtra("object",filmItem)
+        sendBroadcast(intent)
         val viewmodel: DetailMovieViewmodel = ViewModelProvider(
             this,
             DetailMovieFactory(filmItem)

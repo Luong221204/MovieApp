@@ -1,5 +1,6 @@
 package com.example.movieapp.MainActivity.screens.ExploreScreen
 
+import android.util.Log
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.runtime.getValue
@@ -16,6 +17,8 @@ class FilterBottomViewModel:ViewModel() {
     val listCountry=repository.getCountryList()
     val listGenre=repository.getGenreList()
 
+    var option by mutableStateOf("")
+
     var movieOption by mutableStateOf(false)
     var cartoonOption by mutableStateOf(false)
     var tvOption by mutableStateOf(false)
@@ -25,9 +28,10 @@ class FilterBottomViewModel:ViewModel() {
     var yearSelected by mutableStateOf("--/--")
     var countryState by mutableStateOf("--/--")
     var sortState by   mutableStateOf("Recommendation")
-
-    fun changeOption(option:String){
-        when(option){
+    var listGenreSelected : ArrayList<String> = ArrayList()
+    fun changeOption(opt:String){
+        option=opt
+        when(opt){
             "Movies"->{
                 movieOption=true
                 cartoonOption=false
@@ -70,5 +74,14 @@ class FilterBottomViewModel:ViewModel() {
         isShow=false
         optionFilter(nameFilter,data)
 
+    }
+
+    fun onGenreClick(isSelected:Boolean,title:String){
+        if(isSelected) {
+            listGenreSelected.add(title)
+        }
+        else{
+            if(listGenreSelected.contains(title)) listGenreSelected.remove(title)
+        }
     }
 }

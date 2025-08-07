@@ -1,5 +1,6 @@
 package com.example.movieapp.DetailFimActivity
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,6 +17,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,12 +32,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import com.example.movieapp.R
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
 import com.example.movieapp.ui.theme.*
 
 @Composable
 fun FilmItem(item: FilmItemModel, onClick:(FilmItemModel)->Unit){
+    var isSuccess by remember{
+        mutableStateOf(false)
+    }
     Box(
         modifier = Modifier
             .width(140.dp)
@@ -49,13 +58,14 @@ fun FilmItem(item: FilmItemModel, onClick:(FilmItemModel)->Unit){
             .clip(RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField))
             .background(color = Red)
     ){
+
         AsyncImage(
             model = item.Poster,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(width = 140.dp,height = 200.dp)
-                .background(Color.Gray)
+                .background(Color.Gray),
         )
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
