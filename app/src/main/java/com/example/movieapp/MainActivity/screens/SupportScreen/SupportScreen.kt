@@ -1,5 +1,7 @@
 package com.example.movieapp.MainActivity.screens.SupportScreen
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -26,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -35,13 +38,15 @@ import androidx.compose.ui.unit.sp
 import com.example.movieapp.MainActivity.SectionTitle
 import com.example.movieapp.MainActivity.screens.ExploreScreen.CustomForEach
 import com.example.movieapp.MainActivity.screens.ExploreScreen.ItemsInRow
+import com.example.movieapp.MylistActivity.MyListActivity
 import com.example.movieapp.R
 import com.example.movieapp.ui.theme.BlackGray
 
 
 @Composable
 fun SupportScreen(
-    viewmodel: SupportViewmodel
+    viewmodel: SupportViewmodel,
+    context:Context= LocalContext.current
 ) {
     val history=viewmodel.history.collectAsState()
     Column(
@@ -51,11 +56,16 @@ fun SupportScreen(
             .background(color = colorResource(R.color.blackBackground)),
     ) {
         Spacer(modifier = Modifier.height(54.dp))
-        ButtonForMyList("Download",R.drawable.download) { }
+        ButtonForMyList("Download",R.drawable.download) {
+            val intent = Intent(context,MyListActivity::class.java)
+            context.startActivity(intent)
+        }
         Spacer(modifier = Modifier.height(20.dp))
         ButtonForMyList("Favourite",R.drawable.save2) { }
         Spacer(modifier = Modifier.height(8.dp))
-        SectionTitle("History",false) { }
+        SectionTitle("History",false) {
+
+        }
         Text("The last 10 movies you watched will be here",
             fontSize = 11.sp, color = Color.White, fontFamily = FontFamily.SansSerif,
             modifier = Modifier.padding(start = 16.dp)

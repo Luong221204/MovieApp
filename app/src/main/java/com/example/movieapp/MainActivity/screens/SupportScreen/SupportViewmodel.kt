@@ -18,9 +18,15 @@ class SupportViewmodel(
         emptyList()
     )
 
-    suspend fun insertMovie(movie:FilmItemModelLocal){
+    fun insertMovie(movie:FilmItemModelLocal){
         viewModelScope.launch {
             repository.insertMovie(movie)
+        }
+    }
+
+    fun deleteALl(){
+        viewModelScope.launch {
+            repository.deleteAll()
         }
     }
 
@@ -43,6 +49,7 @@ class SupportViewmodel(
     fun convertFilmItemToFilmLocal(filmItemModel: FilmItemModel): FilmItemModelLocal {
         return filmItemModel.let {
             FilmItemModelLocal(Title = it.Title,
+                id = it.id,
                 Description = it.Description,
                 Poster = it.Poster,
                 Time = it.Time,

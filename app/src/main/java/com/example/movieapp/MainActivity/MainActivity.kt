@@ -92,10 +92,6 @@ import kotlinx.coroutines.launch
 class MainActivity : BaseActivity() {
     private lateinit var  supportRepository :SupportRepository
     private lateinit var supportViewmodel :SupportViewmodel
-    private val exceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
-        Toast.makeText(this,"thất bại",Toast.LENGTH_SHORT).show()
-    }
-    private val scope = CoroutineScope(Dispatchers.IO+exceptionHandler)
     private val broadcastReceiver = object :BroadcastReceiver(){
         @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -106,10 +102,7 @@ class MainActivity : BaseActivity() {
                         it
                     )
                 }?.let {
-                    scope.launch {
-                        if(isActive)
-                        supportViewmodel.insertMovie(it)
-                    }
+                    supportViewmodel.insertMovie(it)
                 }
             }
         }
@@ -148,7 +141,6 @@ class MainActivity : BaseActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(broadcastReceiver)
-        scope.cancel()
     }
 }
 

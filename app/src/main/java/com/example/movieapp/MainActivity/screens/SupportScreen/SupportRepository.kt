@@ -13,6 +13,5 @@ class SupportRepository(
     val getHistory:Flow<List<FilmItemModelLocal>> = localDAO.getAllMovies()
 
     suspend fun insertMovie(modelLocal: FilmItemModelLocal) = localDAO.insertNewMovie(modelLocal)
-
-
+    suspend fun deleteAll()= localDAO.deleteAll()
 }

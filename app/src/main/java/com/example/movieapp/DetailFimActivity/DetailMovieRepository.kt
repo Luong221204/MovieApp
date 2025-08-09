@@ -39,6 +39,7 @@ class DetailMovieRepository(private val filmItemModel: FilmItemModel) {
                     listFilm.add(movieFilter)
                 }
                 _searchedFilms.value=listFilm
+
             }
     }
 

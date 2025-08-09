@@ -17,5 +17,6 @@ interface LocalDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNewMovie(movie:FilmItemModelLocal)
 
-
+    @Query("Delete from movies")
+    suspend fun deleteAll()
 }

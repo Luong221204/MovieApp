@@ -2,7 +2,9 @@ package com.example.movieapp.DetailFimActivity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
+import androidx.collection.mutableIntSetOf
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,7 +35,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -43,11 +49,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
@@ -57,6 +66,8 @@ import com.example.movieapp.CastPackage.CastActivity
 import com.example.movieapp.MainActivity.SectionTitle
 import com.example.movieapp.MainActivity.Tag
 import com.example.movieapp.GenreBottom.OnShowBottomSheet
+import com.example.movieapp.MainActivity.screens.ExploreScreen.CustomForEach
+import com.example.movieapp.MainActivity.screens.ExploreScreen.ItemsInRow
 import com.example.movieapp.R
 import com.example.movieapp.domain.CastModel
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
@@ -94,7 +105,9 @@ class DetailMovieActivity : BaseActivity() {
 @Composable
 fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit, onFilmClick: (FilmItemModel) -> Unit, onCastClick :(CastModel)->Unit) {
     val scrollState = rememberScrollState()
-
+    var height by remember{
+        mutableIntStateOf(0)
+    }
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
     val isShowBottomSheet = viewmodel.isShowBottomSheet
@@ -223,6 +236,7 @@ fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit, 
                     when(page){
                         0-> Column {
                             MoreLikeThis(searchedFilm.value,onFilmClick)
+
                         }
                         1-> Column {
                             Spacer(modifier=Modifier.height(24.dp))
@@ -380,6 +394,7 @@ fun MoreLikeThis(list:List<FilmItemModel>,onClick: (FilmItemModel) -> Unit){
         }
 
     }
+
 
 }
 
