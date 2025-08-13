@@ -3,6 +3,7 @@ package com.example.movieapp.DetailFimActivity.Viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.movieapp.PlayerActivity.PlayVideoViewmodel
 
 class PlayMovieFactory constructor(
     val context: Context

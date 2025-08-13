@@ -1,9 +1,12 @@
 package com.example.movieapp.DetailFimActivity
 
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.collection.mutableIntSetOf
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,14 +32,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -50,24 +57,45 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MimeTypes
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.movieapp.BaseActivity
 import com.example.movieapp.CastPackage.CastActivity
+import com.example.movieapp.DetailFimActivity.Viewmodel.PlayMovieFactory
 import com.example.movieapp.MainActivity.SectionTitle
 import com.example.movieapp.MainActivity.Tag
 import com.example.movieapp.GenreBottom.OnShowBottomSheet
 import com.example.movieapp.MainActivity.screens.ExploreScreen.CustomForEach
 import com.example.movieapp.MainActivity.screens.ExploreScreen.ItemsInRow
+import com.example.movieapp.PlayerActivity.PlayVideoViewmodel
+import com.example.movieapp.PlayerActivity.VideoPlayer
 import com.example.movieapp.R
 import com.example.movieapp.domain.CastModel
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
@@ -75,6 +103,7 @@ import com.example.movieapp.domain.FilmItemModel.Trailer
 import kotlinx.coroutines.launch
 
 class DetailMovieActivity : BaseActivity() {
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val filmItem: FilmItemModel = (intent.getSerializableExtra("object") as FilmItemModel)
@@ -99,8 +128,10 @@ class DetailMovieActivity : BaseActivity() {
         intent.putExtra("object",filmItemModel)
         startActivity(intent)
     }
+
 }
 
+@RequiresApi(Build.VERSION_CODES.S)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit, onFilmClick: (FilmItemModel) -> Unit, onCastClick :(CastModel)->Unit) {
@@ -108,6 +139,9 @@ fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit, 
     var height by remember{
         mutableIntStateOf(0)
     }
+    var showDialog by remember { mutableStateOf(false) }
+    var isExpanded by remember { mutableStateOf(false) }
+
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
     val isShowBottomSheet = viewmodel.isShowBottomSheet
@@ -125,6 +159,10 @@ fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit, 
 
     val tag =viewmodel.tag
 
+    //dialog
+    if(showDialog){
+        PlayTrailer(onDismiss = {showDialog=false},viewmodel.filmItemModel.Trailer)
+    }
     OnShowBottomSheet(tag,isShowBottomSheet,sheetState,hideBottomSheet)
     val film = viewmodel.filmItemModel
     Box(
@@ -209,14 +247,36 @@ fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit, 
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    lineHeight = 22.sp,
-                    text = film.Description,
-                    style = TextStyle(color = Color.White, fontSize = 14.sp, fontFamily = FontFamily.SansSerif),
+                var isOver by remember { mutableStateOf(film.Description.length>120) }
 
+                androidx.compose.material3.Text(
+                    lineHeight = 22.sp,
+                    text = buildAnnotatedString {
+                        if (!isExpanded && film.Description.length > 120) {
+                            append(film.Description.take(120))
+                            withStyle(
+                                style = SpanStyle(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.Red
+                                )
+                            ) {
+                                append("...Xem thêm")
+                            }
+                        } else {
+                            append(film.Description)
+                        }
+                    },
+                    style = TextStyle(
+                        color = Color.White.copy(alpha = if(isExpanded || !isOver) 1f else 0.3f) ,
+                        fontSize = 14.sp,
+                        fontFamily = FontFamily.SansSerif
+                    ),
+                    modifier = Modifier.clickable { isExpanded = !isExpanded }
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-                Teaser(film.Trailer)
+                Teaser(film.Trailer){
+                    showDialog=true
+                }
             }
             Spacer(modifier = Modifier.height(24.dp))
             TabLayout(
@@ -312,7 +372,8 @@ fun PartialCaption(text:String,source:Int){
 }
 
 @Composable
-fun Teaser(trailer:Trailer){
+fun Teaser(trailer:Trailer,onClick: () -> Unit){
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
@@ -321,7 +382,7 @@ fun Teaser(trailer:Trailer){
         Box(
             modifier = Modifier.weight(1f)
         ){
-            Video(trailer.Image)
+            Video(trailer.Image, modifier = Modifier.clickable { onClick() })
         }
 
         Box(
@@ -336,7 +397,7 @@ fun Teaser(trailer:Trailer){
                         fontSize = 14.sp)
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(text = trailer.Time,color = Color.White,
+                Text(text = trailer.TimeString(),color = Color.White,
                     style = TextStyle(fontFamily = FontFamily.SansSerif,
                         fontSize = 10.sp))
             }
@@ -347,8 +408,8 @@ fun Teaser(trailer:Trailer){
 
 
 @Composable
-fun Video(link:String){
-    Box(modifier = Modifier){
+fun Video(link:String,modifier: Modifier){
+    Box(modifier = modifier){
         AsyncImage(
             model = link,
             contentScale=ContentScale.Crop,
@@ -520,3 +581,58 @@ fun Gallery(link:String){
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.S)
+@androidx.annotation.OptIn(UnstableApi::class)
+@Composable
+fun PlayTrailer(onDismiss:()->Unit,trailer: Trailer?,context:Context = LocalContext.current){
+    var lifecycle by remember {
+        mutableStateOf(Lifecycle.Event.ON_CREATE)
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver {_,event->
+            lifecycle = event
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycle = Lifecycle.Event.ON_DESTROY
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+
+
+    val player: Player = ExoPlayer.Builder(context).build().apply {
+        playWhenReady = true
+        val mediaItem = MediaItem.Builder()
+            .setUri(trailer?.Video)
+            .setMimeType(MimeTypes.VIDEO_MP4)
+            .build()
+        setMediaItem(mediaItem)
+        prepare()
+    }
+    Dialog(
+        onDismissRequest = {
+            onDismiss()
+            player.release()
+        },
+    ) {
+        AndroidView(
+            modifier = Modifier.fillMaxWidth().aspectRatio(16f/10f),
+            factory = {
+                PlayerView(context).also { playerView ->
+                    playerView.setShowFastForwardButton(true)
+                    playerView.player = player
+                    playerView.keepScreenOn = true
+                    playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_WHEN_PLAYING)
+                    playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                }
+            },
+            update = {
+                if(lifecycle == Lifecycle.Event.ON_PAUSE) player.pause()
+                if(lifecycle == Lifecycle.Event.ON_DESTROY) player.release()
+            }
+        )
+    }
+}

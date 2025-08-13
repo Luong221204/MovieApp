@@ -9,7 +9,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.tasks.await
 
-class AuthRepository (
+class
+AuthRepository (
 ) {
     private val auth = FirebaseAuth.getInstance()
     suspend fun loginWithFacebookToken(token: String): LoginResult {

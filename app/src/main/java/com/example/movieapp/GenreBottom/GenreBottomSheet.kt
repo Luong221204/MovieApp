@@ -174,7 +174,7 @@ fun ListTv(listFilm:List<FilmItemModel>){
 @Composable
 fun Movie(filmItemModel: FilmItemModel,onClick:()->Unit){
     Column {
-        Video(filmItemModel.Poster)
+        Video(filmItemModel.Poster, modifier = Modifier)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = filmItemModel.Title,
