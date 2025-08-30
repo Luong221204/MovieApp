@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
 
 class DetailMovieFactory(
-    private val filmItemModel: FilmItemModel
+    private val repository: DetailMovieRepository
 ):ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(DetailMovieViewmodel::class.java)){
-            return DetailMovieViewmodel(filmItemModel) as T
+            return DetailMovieViewmodel(repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

@@ -56,7 +56,7 @@ fun DownloadScreen(){
     Column(
         modifier = Modifier.background(color = colorResource(R.color.blackBackground)).fillMaxSize()
     ) {
-        TopBarTitle("Download") { }
+        TopBarTitle(R.string.download.toString()) { }
         DownloadItem()
     }
 }

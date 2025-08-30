@@ -93,7 +93,7 @@ class LoginActivity : BaseActivity() {
             val repository = AuthRepository()
             val viewModel: LoginViewModel = ViewModelProvider(
                 this,
-                LoginViewModelFactory(repository, LocalContext.current)
+                LoginViewModelFactory(repository)
             )[LoginViewModel::class.java]
             LoginScreen(modifier = Modifier.alpha(1f).clickable(enabled = false){}, viewModel=viewModel, activity = this) {
                 startActivity(Intent(this, MainActivity::class.java))
@@ -130,12 +130,10 @@ fun LoginScreen(
         when (loginState) {
             is LoginResult.Success -> {
                 viewModel.onUpdateLoadingLoginStatus()
-                Toast.makeText(context, "Xin chào: ${loginState.user.displayName}", Toast.LENGTH_SHORT).show()
                 onLoginClick()
             }
             is LoginResult.Failure -> {
                 viewModel.onErrorLogin()
-                Toast.makeText(context, "Lỗi: ${loginState.error}", Toast.LENGTH_SHORT).show()
             }
             else -> Unit
         }

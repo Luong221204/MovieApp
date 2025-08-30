@@ -20,6 +20,9 @@ class DetailMovieRepository(private val filmItemModel: FilmItemModel) {
     private val _casts = MutableStateFlow<List<CastModel>>(emptyList())
     val casts : StateFlow<List<CastModel>> = _casts
 
+    fun getFilmModel():FilmItemModel{
+        return filmItemModel
+    }
 
     init {
         getMoreFilms()

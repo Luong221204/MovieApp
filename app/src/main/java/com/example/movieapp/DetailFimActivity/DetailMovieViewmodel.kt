@@ -10,9 +10,11 @@ import com.example.movieapp.domain.FilmItemModel.FilmItemModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class DetailMovieViewmodel( val filmItemModel: FilmItemModel) :ViewModel() {
-    private val repository = DetailMovieRepository(filmItemModel)
+class DetailMovieViewmodel(
+    val repository: DetailMovieRepository
+) :ViewModel() {
 
+    var filmItemModel:FilmItemModel = repository.getFilmModel()
     var isShowBottomSheet by mutableStateOf(false)
     var tag by mutableStateOf("")
 
@@ -31,4 +33,6 @@ class DetailMovieViewmodel( val filmItemModel: FilmItemModel) :ViewModel() {
     fun onCloseStatusBottomSheet(){
         isShowBottomSheet=false
     }
+
+
 }

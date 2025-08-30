@@ -23,9 +23,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @UnstableApi
-class PlayVideoViewmodel @SuppressLint("StaticFieldLeak")
+class PlayVideoViewmodel
 constructor(
-    @SuppressLint("StaticFieldLeak") val context:Context,
+    private val repository:  Repository,
     val filmItemModel: FilmItemModel
 ):ViewModel() {
     var job : Job? = null
@@ -35,7 +35,6 @@ constructor(
 
     val listCasts = detailMovieRepository.casts
 
-    private val repository = Repository(filmItemModel)
 
     var isPlaying by mutableStateOf(false)
 
@@ -52,9 +51,8 @@ constructor(
 
     var isBuffering by mutableStateOf(true)
 
-    val uri = RawResourceDataSource.buildRawResourceUri(R.raw.video)
 
-    var player:Player = ExoPlayer.Builder(context).build().apply {
+    var player:Player = repository.player.apply {
         playWhenReady = true
         val mediaItem = MediaItem.Builder()
             .setUri(filmItemModel.Link)

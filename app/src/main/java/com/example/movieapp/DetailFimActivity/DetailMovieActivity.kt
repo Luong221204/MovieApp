@@ -102,9 +102,10 @@ class DetailMovieActivity : BaseActivity() {
         val intent = Intent("object")
         intent.putExtra("object",filmItem)
         sendBroadcast(intent)
+        val repository= DetailMovieRepository(filmItem)
         val viewmodel: DetailMovieViewmodel = ViewModelProvider(
             this,
-            DetailMovieFactory(filmItem)
+            DetailMovieFactory(repository)
         )[DetailMovieViewmodel::class.java]
         setContent {
             MovieAppTheme {

@@ -7,9 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class CastViewmodel(
-    private val castModel: CastModel
+    private val repository: CastRepository
 ):ViewModel() {
-    private val repository = CastRepository(castModel)
 
     val films =repository.films
 

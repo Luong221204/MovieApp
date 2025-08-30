@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.movieapp.domain.CastModel
 
 class CastViewmodelFactory(
-    val castModel: CastModel
+    val repository: CastRepository
 ):ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(CastViewmodel::class.java)){
-            return CastViewmodel(castModel) as T
+            return CastViewmodel(repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
 

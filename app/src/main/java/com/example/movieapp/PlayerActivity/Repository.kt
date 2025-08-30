@@ -9,10 +9,10 @@ import com.example.movieapp.DetailFimActivity.DetailMovieRepository
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
 
 class Repository(
-    private val filmItemModel: FilmItemModel
+    private val filmItemModel: FilmItemModel,
+    private val context: Context
 ) {
-
-
+    val player:Player =ExoPlayer.Builder(context).build()
 
 
 }

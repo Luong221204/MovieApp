@@ -66,9 +66,10 @@ class CastActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         val castModel = intent.getSerializableExtra("cast",CastModel::class.java)
         if(castModel!=null){
+            val repository = CastRepository(castModel)
             val viewmodel : CastViewmodel = ViewModelProvider(
                 this,
-                CastViewmodelFactory(castModel)
+                CastViewmodelFactory(repository)
             )[CastViewmodel::class.java]
             setContent {
                 MovieAppTheme{

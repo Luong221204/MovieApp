@@ -104,10 +104,11 @@ class PlayMovieActivity : BaseActivity() {
         intent.putExtra("object",filmItem)
         setContent {
             MovieAppTheme{
+                val repository = Repository(filmItem,applicationContext)
                 val context = LocalContext.current
                 val viewmodel: PlayVideoViewmodel = ViewModelProvider(
                     this, PlayMovieFactory(
-                        context,filmItem
+                        repository,filmItem
                     )
                 )[PlayVideoViewmodel::class.java]
                 ViewScreen(viewmodel, context)
