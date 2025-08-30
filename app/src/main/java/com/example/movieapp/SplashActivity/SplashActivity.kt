@@ -65,14 +65,7 @@ fun IntroScreenPreview(){
         snapshotFlow { listState.firstVisibleItemScrollOffset }
             .collect { Log.d("DUCLUONG","The value is $it") }
     }
-    Box(modifier = Modifier.fillMaxSize()){
-        LazyColumn(state = listState) {
-            items(100){
-                it->
-                Text(text = "$it", modifier = Modifier.fillMaxWidth().padding(10.dp).height(100.dp))
-            }
-        }
-    }
+
 
 }
 @Composable
@@ -89,7 +82,7 @@ fun IntroScreen(getInClick:()->Unit){
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ){
-                Spacer(modifier = Modifier.height(MovieAppTheme.dimensionValue.spacer1*8))
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer8))
                 HeaderSection()
                 FooterSection(getInClick)
             }
@@ -102,7 +95,7 @@ fun HeaderSection() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(600.dp)
+            .height(MovieAppTheme.blockDimension.b60)
     ){
         Image(painter = painterResource(id = R.drawable.bg2),
             contentDescription = null,
@@ -116,13 +109,13 @@ fun HeaderSection() {
         ){
             Image(painter = painterResource(id = R.drawable.woman),
                 contentDescription = null,
-                modifier = Modifier.size(360.dp))
-            Spacer (modifier= Modifier.height(MovieAppTheme.dimensionValue.spacer1*4))
+                modifier = Modifier.size(MovieAppTheme.blockDimension.b40))
+            Spacer (modifier= Modifier.height(MovieAppTheme.spacerDimension.spacer7))
             Text(
                 text = "Watch Videos in \nVirtual Reality",
                 style = MovieAppTheme.appTypoTheme.textRecommend.copy(fontSize = 40.sp, textAlign = TextAlign.Center)
             )
-            Spacer (modifier=Modifier.height(MovieAppTheme.dimensionValue.spacer1*4))
+            Spacer (modifier=Modifier.height(MovieAppTheme.spacerDimension.spacer7))
             Text(
                 text = "Download and watch offline\nwherever you are",
                 style= MovieAppTheme.appTypoTheme.textFieldTitle.copy(textAlign = TextAlign.Center, fontSize = 18.sp, color = Color.White.copy(alpha = 0.5f))
@@ -137,7 +130,7 @@ fun FooterSection(onGetInClick:()->Unit){
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp)
+            .height(MovieAppTheme.blockDimension.b18)
     ){
         Image(painter = painterResource(id = R.drawable.bg2),
             contentDescription = null,
@@ -145,7 +138,7 @@ fun FooterSection(onGetInClick:()->Unit){
             modifier = Modifier.matchParentSize())
         Button(
             onClick = onGetInClick,
-            modifier = Modifier.size(200.dp,50.dp).align(Alignment.Center),
+            modifier = Modifier.size(MovieAppTheme.blockDimension.b20,MovieAppTheme.blockDimension.b5).align(Alignment.Center),
             shape = RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForButton),
             border = BorderStroke(
                 width = MovieAppTheme.dimensionValue.borderWidthForButton,
@@ -166,13 +159,13 @@ fun CustomDialog(onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         Box(
             modifier = Modifier
-                .size(250.dp)
-                .background(Color.White, shape = RoundedCornerShape(16.dp))
-                .padding(16.dp)
+                .size(MovieAppTheme.blockDimension.b25)
+                .background(Color.White, shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r16))
+                .padding(MovieAppTheme.paddingDimension.padding3)
         ) {
             Column {
                 Text("Tùy chỉnh Dialog", fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
                 Button(onClick = onDismiss) {
                     Text("Đóng")
                 }

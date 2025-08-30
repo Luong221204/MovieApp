@@ -145,20 +145,6 @@ class MainActivity : BaseActivity() {
 }
 
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Composable
-fun GreetingPreview() {
-    MovieAppTheme {
-        Greeting("Android")
-    }
-}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -253,12 +239,12 @@ fun HomeScreen(onSeeAllClick:(String)->Unit,onItemClick: (FilmItemModel) -> Unit
         ShowItemsOnScreen(showOutstandingLoading){
             MostOutStanding(showBottomSheet,viewModel,onItemClick)
         }
-        SectionTitle("New Movies",true, onClick = onSeeAllClick)
+        SectionTitle(R.string.new_movies.toString(),true, onClick = onSeeAllClick)
 
         ShowItemsOnScreen(showNewMovieLoading){
             LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                contentPadding = PaddingValues(horizontal = 10.dp)
+                horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding0),
+                contentPadding = PaddingValues(horizontal = MovieAppTheme.paddingDimension.padding2)
             ){
                 items(newMovie){
                     item->
@@ -266,13 +252,14 @@ fun HomeScreen(onSeeAllClick:(String)->Unit,onItemClick: (FilmItemModel) -> Unit
                 }
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        SectionTitle("Upcoming Movies",true,onSeeAllClick)
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
+
+        SectionTitle(R.string.upcoming_movies.toString(),true,onSeeAllClick)
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
         ShowItemsOnScreen(showUpcomingLoading){
             LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                contentPadding = PaddingValues(horizontal = 10.dp)
+                horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding0),
+                contentPadding = PaddingValues(horizontal = MovieAppTheme.spacerDimension.spacer2)
             ){
                 items(upcoming){
                         item->
@@ -280,8 +267,8 @@ fun HomeScreen(onSeeAllClick:(String)->Unit,onItemClick: (FilmItemModel) -> Unit
                 }
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        SectionTitle("Categories",false,null)
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
+        SectionTitle(R.string.category.toString(),false,null)
         ShowItemsOnScreen(showCategoryLoading) {
             Categories(categories)
         }
@@ -289,7 +276,7 @@ fun HomeScreen(onSeeAllClick:(String)->Unit,onItemClick: (FilmItemModel) -> Unit
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(100.dp)
+                .height(MovieAppTheme.blockDimension.b10)
                 .background(color = colorResource(R.color.black1))
         )
     }
@@ -302,7 +289,7 @@ fun ShowItemsOnScreen(showLoading:Boolean, content:@Composable ()-> Unit){
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),
+                .height(MovieAppTheme.blockDimension.b5),
         ){
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
@@ -314,19 +301,16 @@ fun ShowItemsOnScreen(showLoading:Boolean, content:@Composable ()-> Unit){
 @Composable
 fun SectionTitle(title:String, isDisplay:Boolean, onClick: ((String) -> Unit)?){
     Box(modifier = Modifier
-        .padding(horizontal = 16.dp, vertical = 16.dp)
+        .padding(horizontal = MovieAppTheme.paddingDimension.padding3, vertical = MovieAppTheme.paddingDimension.padding3)
         .fillMaxWidth()){
         Text(text = title,
-            style = TextStyle(color = Color.White, fontSize = 18.sp, fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.Bold),
+            style = MovieAppTheme.appTypoTheme.t20,
             modifier = Modifier.align(Alignment.TopStart)
         )
         if(isDisplay){
             Text(
-                text = "See all",
-                style = TextStyle(
-                    color = colorResource(R.color.purple_500),
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily.SansSerif),
+                text = R.string.see_all.toString(),
+                style =MovieAppTheme.appTypoTheme.t19,
                 modifier = Modifier
                     .clickable {
                         if (onClick != null) {
@@ -346,15 +330,15 @@ fun Tag(onOpenGenre: ((String) -> Unit)?,title:String){
         modifier= Modifier
             .background(
                 color = colorResource(R.color.black2),
-                shape = RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField)
+                shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20)
             )
             .border(
                 BorderStroke(
                     width = MovieAppTheme.dimensionValue.borderWidthForTag,
                     brush = Brush.linearGradient(colors = MovieAppTheme.colorScheme.linearGradientColorsForButton)
-                ), shape = RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField)
+                ), shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20)
             )
-            .clip(shape = RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField))
+            .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20))
             .clickable {
                 if (onOpenGenre != null) {
                     onOpenGenre(title)
@@ -363,8 +347,8 @@ fun Tag(onOpenGenre: ((String) -> Unit)?,title:String){
     ){
         Text(
             text=title,
-            style=TextStyle(fontSize = 10.sp, color = Color.White,fontFamily = FontFamily.Monospace),
-            modifier = Modifier.padding(vertical = 7.dp, horizontal = 10.dp)
+            style=MovieAppTheme.appTypoTheme.t21,
+            modifier = Modifier.padding(vertical =MovieAppTheme.paddingDimension.padding1, horizontal = MovieAppTheme.paddingDimension.padding12)
         )
     }
 }
@@ -381,7 +365,7 @@ fun MostOutStanding(onOpenGenre: (String) -> Unit,viewModel: MainViewModel,onIte
             Box(
                 modifier= Modifier
                     .clickable { onItemClick(filmItemModel) }
-                    .height(420.dp)
+                    .height(MovieAppTheme.blockDimension.b42)
                     .fillMaxWidth()
             ){
                 AsyncImage(
@@ -389,11 +373,10 @@ fun MostOutStanding(onOpenGenre: (String) -> Unit,viewModel: MainViewModel,onIte
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = null,
-                    alpha = 1.5f
                 )
                 Box(
                     modifier = Modifier
-                        .height(380.dp)
+                        .height(MovieAppTheme.blockDimension.b38)
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter)
                         .background(
@@ -408,16 +391,19 @@ fun MostOutStanding(onOpenGenre: (String) -> Unit,viewModel: MainViewModel,onIte
                 )
                 Text(
                     text =filmItemModel.Title,
-                    style = TextStyle(fontSize = 32.sp, color = Color.White, fontFamily = FontFamily.Cursive),
+                    style = MovieAppTheme.appTypoTheme.t6,
                     modifier = Modifier
-                        .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
+                        .padding(
+                            start =MovieAppTheme.paddingDimension.padding2,
+                            end = MovieAppTheme.paddingDimension.padding2,
+                            bottom = MovieAppTheme.paddingDimension.padding2)
                         .align(Alignment.BottomCenter)
                 )
 
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
             LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding1),
             ){
                 for(i in 0..<filmItemModel.Genre.size){
                     item {
@@ -426,10 +412,10 @@ fun MostOutStanding(onOpenGenre: (String) -> Unit,viewModel: MainViewModel,onIte
                 }
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            modifier = Modifier.padding(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding1),
+            modifier = Modifier.padding(MovieAppTheme.paddingDimension.padding2),
         ){
             for(i in 0..<filmItemModel.Gallery.size){
                 item {
@@ -448,9 +434,9 @@ fun MostOutStanding(onOpenGenre: (String) -> Unit,viewModel: MainViewModel,onIte
 fun Picture(viewModel: MainViewModel,isSelected:Boolean=false, link:String,index:Int){
     Box(
         modifier = Modifier
-        .height(50.dp)
-        .width(90.dp)
-        .clip(shape = RoundedCornerShape(10.dp))
+        .height(MovieAppTheme.blockDimension.b5)
+        .width(MovieAppTheme.blockDimension.b9)
+        .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r10))
         .clickable{
             viewModel.changeImageOnTop(link,index)
         }
@@ -459,7 +445,7 @@ fun Picture(viewModel: MainViewModel,isSelected:Boolean=false, link:String,index
             model = link,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            alpha = if(isSelected) 1f else 0.3f
+            alpha = if(isSelected) MovieAppTheme.alpha.a10 else MovieAppTheme.alpha.a3
         )
     }
 }
@@ -467,10 +453,10 @@ fun Picture(viewModel: MainViewModel,isSelected:Boolean=false, link:String,index
 @Composable
 fun Categories(list:List<Category>){
     LazyHorizontalGrid(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues( 10.dp),
-        rows = GridCells.Fixed(2), modifier = Modifier.height(250.dp) )
+        horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding1),
+        verticalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding1),
+        contentPadding = PaddingValues( MovieAppTheme.paddingDimension.padding2),
+        rows = GridCells.Fixed(2), modifier = Modifier.height(MovieAppTheme.blockDimension.b25) )
     {
         item(span = { GridItemSpan(2) }) {
             Category(list[0])
@@ -488,9 +474,8 @@ fun Categories(list:List<Category>){
 fun Category(category: Category){
     Box(
         modifier = Modifier
-            .height(0.dp)
-            .width(180.dp)
-            .clip(shape = RoundedCornerShape(10.dp))
+            .width(MovieAppTheme.blockDimension.b18)
+            .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r10))
 
     ){
         AsyncImage(
@@ -515,12 +500,8 @@ fun Category(category: Category){
         Text(text = category.Name,
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(bottom = 10.dp, start = 20.dp)
-            , style = TextStyle(
-                color = Color.White,
-                fontFamily = FontFamily.Monospace,
-                fontSize = 15.sp,
-            )
+                .padding(bottom = MovieAppTheme.paddingDimension.padding2, start = MovieAppTheme.paddingDimension.padding4)
+            , style = MovieAppTheme.appTypoTheme.t22
         )
     }
 }

@@ -57,7 +57,6 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
-@Preview
 fun SearchBar(hint:String = "",onFilterClick:()->Unit,onSearchListener:(String)->Unit){
     var text by rememberSaveable{
         mutableStateOf("")
@@ -72,12 +71,12 @@ fun SearchBar(hint:String = "",onFilterClick:()->Unit,onSearchListener:(String)-
     }
     val keyboardController = LocalSoftwareKeyboardController.current
     Row(
-        modifier = Modifier.padding(horizontal = 16.dp)
+        modifier = Modifier.padding(horizontal = MovieAppTheme.iconDimension.i3)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .height(48.dp)
+                .fillMaxWidth(MovieAppTheme.alpha.a8)
+                .height(MovieAppTheme.viewDimension.v11)
                 .background(
                     color = BlackGray,shape= RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField)
                 )
@@ -94,7 +93,7 @@ fun SearchBar(hint:String = "",onFilterClick:()->Unit,onSearchListener:(String)-
                         painter = painterResource(id = R.drawable.search),
                         contentDescription = null,
                         tint = MovieAppTheme.colorScheme.iconTint,
-                        modifier = Modifier.padding(start = 8.dp).size(MovieAppTheme.dimensionValue.iconSize2)
+                        modifier = Modifier.padding(start = MovieAppTheme.paddingDimension.padding1).size(MovieAppTheme.dimensionValue.iconSize2)
                     )
                 },
                 trailingIcon = {
@@ -128,14 +127,14 @@ fun SearchBar(hint:String = "",onFilterClick:()->Unit,onSearchListener:(String)-
                 textStyle = MovieAppTheme.appTypoTheme.textStyleForSearch,
                 singleLine = true
             )
-            Spacer(modifier = Modifier.width(MovieAppTheme.dimensionValue.spacer1))
+            Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer0))
 
 
         }
-        Spacer(modifier = Modifier.width(20.dp))
+        Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer4))
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(MovieAppTheme.viewDimension.v11)
                 .clickable { onFilterClick() }
                 .background(
                     color = BlackGray,

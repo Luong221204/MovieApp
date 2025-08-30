@@ -16,5 +16,6 @@ data class FilmItemModel(
     var Genre: ArrayList<String> =ArrayList(),
     var Actors: ArrayList<CastModel> =ArrayList(),
     var Gallery: ArrayList<String> =ArrayList(),
+    val Link:String = "",
     var id:String=""
     ):Serializable

@@ -54,6 +54,7 @@ import com.example.movieapp.MainActivity.SectionTitle
 import com.example.movieapp.R
 import com.example.movieapp.domain.Country
 import com.example.movieapp.ui.theme.BlackGray
+import com.example.movieapp.ui.theme.MovieAppTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,82 +102,85 @@ fun FilterBottomSheet(
     if(isShow){
         OptionBottomSheet(onHideBottomSheet= hideBottomSheet,filterSheetState,currentFilter,listCountry)
     }
-    ModalBottomSheet(
-        modifier = Modifier.height(650.dp).fillMaxWidth(),
-        onDismissRequest = {
-            onHideBottomSheet(currentFilter,viewModel.listGenreSelected,countryState,yearSelected)
-        }
-        ,
-        sheetState = sheetState,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = Color.Red.copy(alpha = 0.8f)) },
-        containerColor = colorResource(R.color.blackBackground)
-    ) {
-        Column(
-            modifier = Modifier.verticalScroll(rememberScrollState())
+    MovieAppTheme{
+        ModalBottomSheet(
+            modifier = Modifier.height(MovieAppTheme.blockDimension.b60).fillMaxWidth(),
+            onDismissRequest = {
+                onHideBottomSheet(currentFilter,viewModel.listGenreSelected,countryState,yearSelected)
+            }
+            ,
+            sheetState = sheetState,
+            dragHandle = { BottomSheetDefaults.DragHandle(color = Color.Red.copy(alpha = MovieAppTheme.alpha.a8)) },
+            containerColor = colorResource(R.color.blackBackground)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
-                CategoryOption("Movies",movieOption) {
-                   viewModel.changeOption("Movies")
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    CategoryOption(R.string.movies.toString(),movieOption) {
+                        viewModel.changeOption(R.string.movies.toString())
+                    }
+                    CategoryOption(R.string.cartoons.toString(),cartoonOption) {
+                        viewModel.changeOption(R.string.cartoons.toString())
+                    }
                 }
-                CategoryOption("Cartoons",cartoonOption) {
-                    viewModel.changeOption("Cartoons")
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer3))
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    CategoryOption(R.string.tv.toString(),tvOption) {
+                        viewModel.changeOption(R.string.tv.toString())
+                    }
+                    CategoryOption(R.string.series.toString(),seriesOption) {
+                        viewModel.changeOption(R.string.series.toString())
+                    }
                 }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                CategoryOption("Tv",tvOption) {
-                    viewModel.changeOption("Tv")
-                }
-                CategoryOption("Series",seriesOption) {
-                    viewModel.changeOption("Series")
-                }
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            SectionTitle("Genre",false) { }
-            ListGenre(listGenre,viewModel.listGenreSelected){
-                isSelected,title->
-                viewModel.onGenreClick(isSelected,title)
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-            Filter("Release",R.drawable.calendar,yearSelected) { showBottomSheet("Release") }
-
-            Spacer(modifier = Modifier.height(24.dp))
-            Filter("Country",R.drawable.world,countryState) {  showBottomSheet("Country") }
-
-            Spacer(modifier = Modifier.height(24.dp))
-            Filter("Sort by",R.drawable.sort,sortState) {  }
-
-            Spacer(modifier = Modifier.height(24.dp))
-            Box(
-                modifier = Modifier.height(1.dp).fillMaxWidth().padding(horizontal = 16.dp).background(color = BlackGray)
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                ApplyButton("Reset", BlackGray) { }
-                ApplyButton("Apply", Color.Red.copy(alpha = 0.8f)) {
-                    onHideBottomSheet(currentFilter,viewModel.listGenreSelected,countryState,yearSelected)
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer0))
+                SectionTitle(R.string.genre.toString(),false) { }
+                ListGenre(listGenre,viewModel.listGenreSelected){
+                        isSelected,title->
+                    viewModel.onGenreClick(isSelected,title)
                 }
 
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer7))
+                Filter(R.string.callendar.toString(),R.drawable.calendar,yearSelected) { showBottomSheet(R.string.callendar.toString()) }
+
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer5))
+                Filter(R.string.country.toString(),R.drawable.world,countryState) {  showBottomSheet(R.string.country.toString()) }
+
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer5))
+                Filter(R.string.sort_by.toString(),R.drawable.sort,sortState) {  }
+
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer5))
+                Box(
+                    modifier = Modifier.height(MovieAppTheme.thinDimension.t2).fillMaxWidth().padding(horizontal = MovieAppTheme.paddingDimension.padding3).background(color = BlackGray)
+                )
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer5))
+                Row(
+                    modifier = Modifier.padding(horizontal = MovieAppTheme.paddingDimension.padding3),
+                    horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding5)
+                ) {
+                    ApplyButton(R.string.reset.toString(), BlackGray) { }
+                    ApplyButton(R.string.apply.toString(), Color.Red.copy(alpha = MovieAppTheme.alpha.a8)) {
+                        onHideBottomSheet(currentFilter,viewModel.listGenreSelected,countryState,yearSelected)
+                    }
+
+                }
             }
         }
     }
+
 }
 
 @Composable
 fun ListGenre(list: List<String>,listGenreSelected:List<String>,onClick: (Boolean,String) -> Unit){
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding3),
+        contentPadding = PaddingValues(horizontal = MovieAppTheme.paddingDimension.padding3, vertical = MovieAppTheme.paddingDimension.padding1)
     ) {
         items(list){
             Genre(it,listGenreSelected) {
@@ -191,15 +195,15 @@ fun ListGenre(list: List<String>,listGenreSelected:List<String>,onClick: (Boolea
 fun CategoryOption(title:String,isSelected:Boolean,onClick:()->Unit){
     Box(
         modifier = Modifier
-            .height(48.dp)
-            .width(174.dp)
-            .background(color = if(isSelected) Color.Red.copy(alpha = 0.8f)else BlackGray,
-                shape = RoundedCornerShape(20.dp))
-            .clip(shape = RoundedCornerShape(20.dp))
+            .height(MovieAppTheme.viewDimension.v11)
+            .width(MovieAppTheme.viewDimension.v13)
+            .background(color = if(isSelected) Color.Red.copy(alpha =MovieAppTheme.alpha.a8)else BlackGray,
+                shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20))
+            .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20))
             .selectable(selected = isSelected, onClick = onClick, role = Role.RadioButton)
     ){
         Text(text = title,
-            color = Color.White, fontSize = 14.sp, fontFamily = FontFamily.SansSerif,
+           style = MovieAppTheme.appTypoTheme.t8,
             modifier = Modifier.align(Alignment.Center))
     }
 }
@@ -208,14 +212,15 @@ fun CategoryOption(title:String,isSelected:Boolean,onClick:()->Unit){
 fun ApplyButton(title:String,color: Color,onClick:()->Unit){
     Box(
         modifier = Modifier
-            .height(56.dp)
-            .width(174.dp)
+            .height(MovieAppTheme.viewDimension.v14)
+            .width(MovieAppTheme.viewDimension.v13)
             .background(color = color,
-                shape = RoundedCornerShape(20.dp))
-            .clip(shape = RoundedCornerShape(20.dp))
+                shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20))
+            .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20))
     ){
         Text(text = title,
-            color = Color.White, fontSize = 14.sp, fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.SemiBold,
+            style = MovieAppTheme.appTypoTheme.t8,
+
             modifier = Modifier.align(Alignment.Center).clickable { onClick() })
     }
 }
@@ -226,10 +231,10 @@ fun Genre(title:String,listGenreSelected:List<String>,onClick:(Boolean,String)->
     }
     Box(
         modifier = Modifier
-            .background(color = if(isSelected) Color.Red.copy(alpha = 0.8f)else Color.Transparent,
-                shape = RoundedCornerShape(20.dp))
-            .border(BorderStroke(width = 1.dp, color = BlackGray), shape = RoundedCornerShape(20.dp) )
-            .clip(shape = RoundedCornerShape(20.dp))
+            .background(color = if(isSelected) Color.Red.copy(alpha = MovieAppTheme.alpha.a8)else Color.Transparent,
+                shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20))
+            .border(BorderStroke(width = MovieAppTheme.thinDimension.t2, color = BlackGray), shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20) )
+            .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20))
             .selectable(
                 selected = isSelected,
                 onClick = {
@@ -239,8 +244,8 @@ fun Genre(title:String,listGenreSelected:List<String>,onClick:(Boolean,String)->
                 role = Role.Checkbox)
     ){
         Text(text = title,
-            color = Color.White, fontSize = 13.sp, fontFamily = FontFamily.SansSerif,
-            modifier = Modifier.padding(vertical =12.dp, horizontal = 16.dp))
+            style = MovieAppTheme.appTypoTheme.t25,
+            modifier = Modifier.padding(vertical =MovieAppTheme.paddingDimension.padding2, horizontal = MovieAppTheme.paddingDimension.padding3))
     }
 }
 
@@ -249,35 +254,32 @@ fun Filter(content:String,source:Int,data:String,onClick:()->Unit){
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(54.dp)
+            .height(MovieAppTheme.viewDimension.v14)
             .clickable { onClick() }
-            .padding(horizontal = 16.dp)
-            .background(color = BlackGray, shape = RoundedCornerShape(20.dp))
-            .clip(shape =RoundedCornerShape(20.dp) )
+            .padding(horizontal = MovieAppTheme.paddingDimension.padding3)
+            .background(color = BlackGray, shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20))
+            .clip(shape =RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20) )
     ){
        Row(
            verticalAlignment = Alignment.CenterVertically,
-           modifier = Modifier.align(Alignment.TopStart).fillMaxHeight().padding(start = 16.dp)
+           modifier = Modifier.align(Alignment.TopStart).fillMaxHeight().padding(start = MovieAppTheme.paddingDimension.padding3)
        ){
            Icon(
                painter = painterResource(source),
                contentDescription = null,
-               tint = Color.Red.copy(alpha = 0.8f),
-               modifier = Modifier.size(24.dp)
+               tint = Color.Red.copy(alpha = MovieAppTheme.alpha.a8),
+               modifier = Modifier.size(MovieAppTheme.paddingDimension.padding5)
            )
-           Spacer(modifier = Modifier.width(16.dp))
+           Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer3))
            Text(
                text = content,
-               color = Color.White,
-               fontSize = 12.sp,
-               fontWeight = FontWeight.SemiBold
+             style = MovieAppTheme.appTypoTheme.t11
            )
        }
         Text(
             text = data,
-            color = Color.White,
-            fontSize = 12.sp,
-            modifier = Modifier.align(Alignment.CenterEnd).padding(end = 16.dp)
+            style = MovieAppTheme.appTypoTheme.t7,
+            modifier = Modifier.align(Alignment.CenterEnd).padding(end = MovieAppTheme.paddingDimension.padding3)
         )
     }
 }
@@ -298,18 +300,18 @@ fun OptionBottomSheet(
     ModalBottomSheet(
         dragHandle = {
             Box(
-                modifier = Modifier.fillMaxWidth().padding(24.dp)
+                modifier = Modifier.fillMaxWidth().padding(MovieAppTheme.paddingDimension.padding5)
             ){
                 Icon(
                     painter = painterResource(R.drawable.close),
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp).align(Alignment.CenterEnd),
+                    modifier = Modifier.size(MovieAppTheme.iconDimension.i3).align(Alignment.CenterEnd),
                     tint = Color.Red
                 )
             }
         },
         sheetState = sheetState,
-        modifier = Modifier.height(300.dp),
+        modifier = Modifier.height(MovieAppTheme.blockDimension.b30),
         onDismissRequest = {onHideBottomSheet(content,output)},
         containerColor = colorResource(R.color.blackBackground)
 
@@ -340,7 +342,7 @@ fun ReleaseFilter(onClick: (String) -> Unit){
                 numberSelected= it
                 onClick(it.toString())
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
         }
     }
 }
@@ -364,17 +366,17 @@ fun Year(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .height(MovieAppTheme.viewDimension.v11)
             .clickable { onClick(number) }
-            .padding(horizontal = 16.dp)
-            .background(color = if(number == numberSelected) Color.Red.copy(alpha = 0.8f)else BlackGray
-                , shape = RoundedCornerShape(20.dp))
-            .clip(shape =RoundedCornerShape(20.dp) )
+            .padding(horizontal = MovieAppTheme.paddingDimension.padding3)
+            .background(color = if(number == numberSelected) Color.Red.copy(alpha = MovieAppTheme.alpha.a8)else BlackGray
+                , shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20))
+            .clip(shape =RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20) )
     ){
-        Text(text  = "$number", color = Color.White,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
-            fontSize = 13.sp,
-            fontWeight = FontWeight.SemiBold)
+        Text(text  = "$number",
+            modifier = Modifier.padding(horizontal = MovieAppTheme.paddingDimension.padding3, vertical = MovieAppTheme.paddingDimension.padding3),
+            style = MovieAppTheme.appTypoTheme.t25
+            )
     }
 }
 
@@ -388,8 +390,8 @@ fun FlagsInRow(list: List<Country>,onClick: (String) -> Unit){
         list.CustomForEach(4) {
             list->
             Row(
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
-                modifier = Modifier.padding(horizontal = 16.dp)
+                horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding5),
+                modifier = Modifier.padding(horizontal = MovieAppTheme.paddingDimension.padding3)
             ){
                 repeat(list.size){
                     Flag(list[it],numberSelected) {
@@ -398,7 +400,7 @@ fun FlagsInRow(list: List<Country>,onClick: (String) -> Unit){
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer3))
         }
     }
 
@@ -409,8 +411,8 @@ fun FlagsInRow(list: List<Country>,onClick: (String) -> Unit){
 fun Flag(country:Country,isSelected: Int,onClick: (Country) -> Unit){
     Box(
         modifier = Modifier
-            .height(48.dp).width(72.dp).border(
-            BorderStroke(width = 1.5.dp, color = if(country.id==isSelected) Color.White else Color.Transparent)
+            .height(MovieAppTheme.viewDimension.v11).width(MovieAppTheme.viewDimension.v15).border(
+            BorderStroke(width = MovieAppTheme.thinDimension.t2, color = if(country.id==isSelected) Color.White else Color.Transparent)
         )){
         Image(
             painter = painterResource(country.id),

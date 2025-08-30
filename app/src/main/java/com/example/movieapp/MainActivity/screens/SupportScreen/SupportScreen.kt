@@ -41,6 +41,7 @@ import com.example.movieapp.MainActivity.screens.ExploreScreen.ItemsInRow
 import com.example.movieapp.MylistActivity.MyListActivity
 import com.example.movieapp.R
 import com.example.movieapp.ui.theme.BlackGray
+import com.example.movieapp.ui.theme.MovieAppTheme
 
 
 @Composable
@@ -55,28 +56,29 @@ fun SupportScreen(
             .fillMaxSize()
             .background(color = colorResource(R.color.blackBackground)),
     ) {
-        Spacer(modifier = Modifier.height(54.dp))
-        ButtonForMyList("Download",R.drawable.download) {
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer9))
+        ButtonForMyList(R.string.download.toString(),R.drawable.download) {
             val intent = Intent(context,MyListActivity::class.java)
             context.startActivity(intent)
         }
-        Spacer(modifier = Modifier.height(20.dp))
-        ButtonForMyList("Favourite",R.drawable.save2) { }
-        Spacer(modifier = Modifier.height(8.dp))
-        SectionTitle("History",false) {
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer5))
+        ButtonForMyList(R.string.favourite.toString(),R.drawable.save2) { }
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
+        SectionTitle(R.string.history.toString(),false) {
 
         }
-        Text("The last 10 movies you watched will be here",
-            fontSize = 11.sp, color = Color.White, fontFamily = FontFamily.SansSerif,
-            modifier = Modifier.padding(start = 16.dp)
+        Text(
+            R.string.last_10.toString(),
+            style = MovieAppTheme.appTypoTheme.t16,
+            modifier = Modifier.padding(start = MovieAppTheme.paddingDimension.padding3)
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer5))
         history.value.CustomForEach(2){
                 list->
             ItemsInRow(viewmodel.convertListFilm(list))
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
         }
-        Box(modifier = Modifier.height(100.dp).background(color = colorResource(R.color.blackBackground)))
+        Box(modifier = Modifier.height(MovieAppTheme.blockDimension.b10).background(color = colorResource(R.color.blackBackground)))
 
     }
 }
@@ -86,36 +88,34 @@ fun ButtonForMyList(content:String,source:Int,onClick:()->Unit){
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(62.dp)
+            .height(MovieAppTheme.blockDimension.b6)
             .clickable { onClick() }
-            .padding(horizontal = 16.dp)
-            .background(color = BlackGray, shape = RoundedCornerShape(15.dp))
-            .border(BorderStroke(width = 0.5.dp, color = Color.Red.copy(0.7f)), shape =RoundedCornerShape(15.dp))
-            .clip(shape = RoundedCornerShape(15.dp) )
+            .padding(horizontal = MovieAppTheme.paddingDimension.padding3)
+            .background(color = BlackGray, shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r15))
+            .border(BorderStroke(width =MovieAppTheme.thinDimension.t1, color = Color.Red.copy(MovieAppTheme.alpha.a7)), shape =RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r15))
+            .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r15) )
     ){
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.align(Alignment.TopStart).fillMaxHeight().padding(start = 16.dp)
+            modifier = Modifier.align(Alignment.TopStart).fillMaxHeight().padding(start = MovieAppTheme.paddingDimension.padding3)
         ){
             Icon(
                 painter = painterResource(source),
                 contentDescription = null,
-                tint = Color.Red.copy(alpha = 0.8f),
-                modifier = Modifier.size(24.dp)
+                tint = Color.Red.copy(alpha = MovieAppTheme.alpha.a8),
+                modifier = Modifier.size(MovieAppTheme.iconDimension.i5)
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            androidx.compose.material3.Text(
+            Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer3))
+            Text(
                 text = content,
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold
+                style = MovieAppTheme.appTypoTheme.t23
             )
         }
         Icon(
             painter = painterResource(R.drawable.a_right),
             contentDescription = null,
-            tint = Color.Red.copy(alpha = 0.8f),
-            modifier = Modifier.size(28.dp).align(Alignment.CenterEnd).padding(end = 16.dp)
+            tint = Color.Red.copy(alpha =MovieAppTheme.alpha.a8),
+            modifier = Modifier.size(MovieAppTheme.iconDimension.i6).align(Alignment.CenterEnd).padding(end = MovieAppTheme.paddingDimension.padding3)
         )
     }
 }

@@ -3,15 +3,18 @@ package com.example.movieapp.PlayerActivity
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import androidx.activity.compose.setContent
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -29,8 +32,10 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.lifecycle.Lifecycle
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -59,7 +66,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -70,94 +76,174 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import com.example.movieapp.BaseActivity
-import com.example.movieapp.DetailFimActivity.Viewmodel.PlayMovieFactory
+import com.example.movieapp.DetailFimActivity.About
+import com.example.movieapp.DetailFimActivity.DetailMovieViewmodel
+import com.example.movieapp.DetailFimActivity.IconChain
+import com.example.movieapp.DetailFimActivity.ListGenre
+import com.example.movieapp.DetailFimActivity.MoreLikeThis
+import com.example.movieapp.DetailFimActivity.TabLayout
+import com.example.movieapp.DetailFimActivity.getListTabLayouts
 import com.example.movieapp.R
+import com.example.movieapp.domain.FilmItemModel.FilmItemModel
 import com.example.movieapp.ui.theme.BlackGray
+import com.example.movieapp.ui.theme.MovieAppTheme
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+
+
 
 class PlayMovieActivity : BaseActivity() {
     @OptIn(UnstableApi::class)
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        val filmItem: FilmItemModel = (intent.getSerializableExtra("object") as FilmItemModel)
+        val intent = Intent("object")
+        intent.putExtra("object",filmItem)
         setContent {
+            MovieAppTheme{
+                val context = LocalContext.current
+                val viewmodel: PlayVideoViewmodel = ViewModelProvider(
+                    this, PlayMovieFactory(
+                        context,filmItem
+                    )
+                )[PlayVideoViewmodel::class.java]
+                ViewScreen(viewmodel, context)
+            }
 
-            val context = LocalContext.current
-            val viewmodel: PlayVideoViewmodel = ViewModelProvider(
-                this, PlayMovieFactory(
-                    context
-                )
-            )[PlayVideoViewmodel::class.java]
-            VideoPlayer(viewmodel, context)
         }
     }
 
 
 }
+
 @RequiresApi(Build.VERSION_CODES.S)
-@Preview
+@OptIn(UnstableApi::class)
 @Composable
-fun ViewScreen(){
-    Column(){
-        Text(text = "Tên phim",
-            style = TextStyle(
-                fontSize = 20.sp,
-                color = Color.White,
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.Bold,
-            )
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically
+fun ViewScreen(viewModel: PlayVideoViewmodel, context: Context){
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .fillMaxSize()
+            .background(color = colorResource(R.color.blackBackground))
+            .navigationBarsPadding()
+    ){
+        VideoPlayer(viewModel,context)
+        Addition(viewModel.filmItemModel.Title,viewModel.filmItemModel.Year,viewModel.filmItemModel.Imdb,modifier = Modifier.padding(start = 16.dp, end = 16.dp))
+        Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer3))
+        ListGenre(modifier = Modifier.padding(start = MovieAppTheme.paddingDimension.padding3),viewModel.filmItemModel.Genre) { }
+        Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer3))
+        DescriptionForFilm(modifier = Modifier.padding(start = MovieAppTheme.paddingDimension.padding3),viewModel.filmItemModel.Description)
+        Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer3))
+        IconChain(modifier = Modifier.fillMaxWidth(MovieAppTheme.alpha.a6))
+        Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer5))
+        TabLayout(
+            modifier = Modifier.height(MovieAppTheme.blockDimension.b60).fillMaxWidth().background(color = colorResource(R.color.black)),
+            viewModel,
+            getListTabLayouts()
         ){
-            Text(text = "2022",
-                style = TextStyle(
-                    fontSize = 11.sp,
-                    color = Color.White,
-                    fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.Normal,
-                )
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(text = "USA",
+                viewmodel,page->
+            val viewmodel3 = viewmodel as PlayVideoViewmodel
+            val searchedFilm = viewmodel3.searchFilms.collectAsState()
+            val cast=viewmodel3.listCasts.collectAsState()
+            Box(
                 modifier = Modifier
-                    .background(color = Color.Red.copy(alpha = 0.3f))
-                    .padding(2.dp),
-                style = TextStyle(
-                    fontSize = 8.sp,
-                    color = Color.White,
-                    fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.Bold,
-                )
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(text = "4 Seasons",
-                style = TextStyle(
-                    fontSize = 11.sp,
-                    color = Color.White,
-                    fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.Normal,
-                )
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(text = "HD",
-                modifier = Modifier
-                    .background(color = Color.Red.copy(alpha = 0.3f))
-                    .padding(2.dp),
-                style = TextStyle(
-                    fontSize = 8.sp,
-                    color = Color.White,
-                    fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.Bold,
-                )
-            )
+                    .fillMaxSize(),
+                contentAlignment = Alignment.TopStart
+            ) {
+                when(page){
+                    0-> Column {
+                        MoreLikeThis(searchedFilm.value){}
+
+                    }
+                    1-> Column {
+                        Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer5))
+                        About(cast.value,viewmodel.filmItemModel.Gallery){}
+                    }
+                }
+
+            }
         }
+    }
+}
+
+@Composable
+fun Imdb(rate:Float,modifier: Modifier){
+    Row(
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .height(MovieAppTheme.viewDimension.v3)
+    ) {
+        Image(
+            painter = painterResource(R.drawable.imdb),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .height(MovieAppTheme.viewDimension.v3)
+                .width(MovieAppTheme.viewDimension.v7)
+                .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r2))
+        )
+        Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer1))
+
+        androidx.compose.material.Text(
+            text = "${rate}",
+            style =MovieAppTheme.appTypoTheme.t17
+        )
 
     }
+}
+@RequiresApi(Build.VERSION_CODES.S)
+@Composable
+fun Addition(name:String,year:Int,rate:Float,modifier: Modifier){
+    Box(
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Column(
+            modifier=Modifier.align(Alignment.CenterStart)
+        ){
+            Text(text = name,
+                style = MovieAppTheme.appTypoTheme.t13
+            )
+            Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer2))
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Text(text = "$year",
+                    style =MovieAppTheme.appTypoTheme.t14
+                )
+                Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer2))
+                Text(text = "USA",
+                    modifier = Modifier
+                        .background(color = Color.Red.copy(alpha = MovieAppTheme.alpha.a3))
+                        .padding(MovieAppTheme.paddingDimension.padding0),
+                    style =MovieAppTheme.appTypoTheme.t15
+                )
+                Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer2))
+                Text(text = "4 Seasons",
+                    style =MovieAppTheme.appTypoTheme.t16
+                )
+                Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer2))
+                Text(text = "HD",
+                    modifier = Modifier
+                        .background(color = Color.Red.copy(alpha = MovieAppTheme.alpha.a3))
+                        .padding(MovieAppTheme.paddingDimension.padding0),
+                    style = MovieAppTheme.appTypoTheme.t15
+                )
+                Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer2))
+                Imdb(rate, modifier = Modifier.padding(start = MovieAppTheme.paddingDimension.padding3))
+            }
+        }
+        Image(
+            painter = painterResource(R.drawable.fav),
+            contentDescription = null,
+            modifier = Modifier
+                .size(MovieAppTheme.viewDimension.v7).align(Alignment.CenterEnd)
+        )
+    }
+
 }
 
 @OptIn(UnstableApi::class)
@@ -211,22 +297,24 @@ fun VideoPlayer(viewModel: PlayVideoViewmodel, context: Context) {
 
 
     LaunchedEffect(isReady) {
-        while (isActive) {
-            if (!isSeeking && isReady) {
-                viewModel.currentPosition = player.currentPosition
-            }
-            delay(200L)
-        }
+         viewModel.job = launch {
+             while (isActive) {
+                 if (!isSeeking && isReady) {
+                     viewModel.currentPosition = player.currentPosition
+                 }
+                 delay(200L)
+             }
+         }
     }
 
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(color = colorResource(R.color.black))
+            .fillMaxWidth()
+            .background(color = colorResource(R.color.blackBackground))
             .navigationBarsPadding()
     ) {
-        if (!isFullScreen) Spacer(modifier = Modifier.height(32.dp))
+        if (!isFullScreen) Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer7))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -234,7 +322,7 @@ fun VideoPlayer(viewModel: PlayVideoViewmodel, context: Context) {
                     if (isFullScreen) it.fillMaxHeight()
                     else it.aspectRatio(16f / 10f)
                 }
-                .background(color = colorResource(R.color.black))
+                .background(color = colorResource(R.color.blackBackground))
 
         ) {
             AndroidView(
@@ -256,8 +344,8 @@ fun VideoPlayer(viewModel: PlayVideoViewmodel, context: Context) {
                         else it.aspectRatio(16f / 9f)
                     }
                     .padding(
-                        start = if (isFullScreen) 26.dp else 0.dp,
-                        end = if (isFullScreen) 64.dp else 0.dp
+                        start = if (isFullScreen) MovieAppTheme.paddingDimension.padding4 else MovieAppTheme.paddingDimension.default,
+                        end = if (isFullScreen) MovieAppTheme.paddingDimension.padding12 else MovieAppTheme.paddingDimension.default
                     ),
                 factory = {
                     PlayerView(context).also { playerView ->
@@ -280,16 +368,16 @@ fun VideoPlayer(viewModel: PlayVideoViewmodel, context: Context) {
             if (showControls) {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth(0.7f)
+                        .fillMaxWidth(MovieAppTheme.alpha.a7)
                         .align(Alignment.Center)
-                        .padding(bottom = 24.dp),
+                        .padding(bottom = MovieAppTheme.paddingDimension.padding5),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     IconButton(onClick = { }) {
                         Icon(
                             painter = painterResource(R.drawable.baseline_skip_previous_24),
                             contentDescription = "Rewind",
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(MovieAppTheme.iconDimension.i5),
                             tint = Color.White
                         )
                     }
@@ -301,7 +389,7 @@ fun VideoPlayer(viewModel: PlayVideoViewmodel, context: Context) {
                                 R.drawable.baseline_play_arrow_24
                             ),
                             contentDescription = "Forward",
-                            modifier = Modifier.size(40.dp),
+                            modifier = Modifier.size(MovieAppTheme.iconDimension.i5),
                             tint = Color.White
                         )
                     }
@@ -310,7 +398,7 @@ fun VideoPlayer(viewModel: PlayVideoViewmodel, context: Context) {
                             painter = painterResource(R.drawable.baseline_skip_next_24),
                             contentDescription = "Forward",
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(MovieAppTheme.iconDimension.i5)
                                 .clickable {
                                     viewModel.setMedia()
 
@@ -323,7 +411,7 @@ fun VideoPlayer(viewModel: PlayVideoViewmodel, context: Context) {
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(bottom = if (isFullScreen) 32.dp else 0.dp),
+                    .padding(bottom = if (isFullScreen) MovieAppTheme.paddingDimension.padding7 else MovieAppTheme.paddingDimension.default),
             ) {
                 if (showControls) {
                     Row(
@@ -339,7 +427,7 @@ fun VideoPlayer(viewModel: PlayVideoViewmodel, context: Context) {
                             contentDescription = null,
                             tint = Color.White,
                             modifier = Modifier
-                                .padding(end = 16.dp)
+                                .padding(end = MovieAppTheme.paddingDimension.padding3)
                                 .clickable {
                                     if (isFullScreen) viewModel.exitFullScreen()
                                     else viewModel.enterFullScreen()
@@ -382,7 +470,7 @@ fun VideoPlayer(viewModel: PlayVideoViewmodel, context: Context) {
                             if (showControls) {
                                 Box(
                                     modifier = Modifier
-                                        .size(10.dp)
+                                        .size(MovieAppTheme.iconDimension.i2)
                                         .align(Alignment.Center)
                                         .background(color = Color.Red, shape = CircleShape)
                                         .clip(CircleShape)
@@ -395,33 +483,36 @@ fun VideoPlayer(viewModel: PlayVideoViewmodel, context: Context) {
             }
 
         }
-        val text1 = "Khi bấm more có thể đổi  để thu gọn lại"+
-                "Thêm animation khi mở rộng (animateContentSize())."
-        var isExpanded by remember { mutableStateOf(false) }
-        var isOver by remember { mutableStateOf(text1.length>160) }
 
-        Spacer(modifier = Modifier.height(8.dp))
-        ViewScreen()
-        Text(
-            lineHeight = 22.sp,
-            text = buildAnnotatedString {
-                if(!isExpanded && text1.length >160) {
-                    append(text1.take(160))
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.SemiBold, color = Color.Red)){
-                        append("...Xem thêm")
-                    }
-                }else{
-                    append(text1)
-                }
-            },
-            style = TextStyle(
-                color = Color.White.copy(alpha = if(isExpanded || !isOver) 1f else 0.3f) ,
-                fontSize = 14.sp,
-                fontFamily = FontFamily.SansSerif
-            ),
-            modifier = Modifier.clickable { isExpanded=!isExpanded }
-            )
     }
+}
+
+
+
+@Composable
+fun DescriptionForFilm(modifier: Modifier,text:String){
+    var isExpanded by remember { mutableStateOf(false) }
+    val isOver by remember { mutableStateOf(text.length>160) }
+    Text(
+        lineHeight = 22.sp,
+        text = buildAnnotatedString {
+            if(!isExpanded && text.length >160) {
+                append(text.take(160))
+                append(" ...")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Red)){
+                    append("Xem thêm")
+                }
+            }else{
+                append(text)
+            }
+        },
+        style = TextStyle(
+            color = Color.White.copy(alpha = if(isExpanded || !isOver) 1f else 0.3f) ,
+            fontSize = 14.sp,
+            fontFamily = FontFamily.SansSerif
+        ),
+        modifier = modifier.clickable { isExpanded=!isExpanded }
+    )
 }
 
 

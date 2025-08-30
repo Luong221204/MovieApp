@@ -1,5 +1,18 @@
 package com.example.movieapp.PlayerActivity
 
-class Repository {
+import android.content.Context
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MimeTypes
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import com.example.movieapp.DetailFimActivity.DetailMovieRepository
+import com.example.movieapp.domain.FilmItemModel.FilmItemModel
+
+class Repository(
+    private val filmItemModel: FilmItemModel
+) {
+
+
+
 
 }

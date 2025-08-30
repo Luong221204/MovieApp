@@ -63,6 +63,7 @@ import com.example.movieapp.MainActivity.SectionTitle
 import com.example.movieapp.R
 import com.example.movieapp.domain.CastModel
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
+import com.example.movieapp.ui.theme.MovieAppTheme
 import kotlinx.coroutines.launch
 
 sealed class TabLayoutItem(
@@ -90,58 +91,59 @@ fun TabLayout(
     val selectedTabIndex = remember {
         derivedStateOf { pagerState.currentPage }
     }
-    Scaffold(
-        modifier = modifier
-    ){
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = it.calculateTopPadding())
-        ) {
-            TabRow(
-                containerColor = colorResource(R.color.blackBackground),
-                selectedTabIndex = selectedTabIndex.value,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = colorResource(R.color.blackBackground))
-                    .padding(horizontal = 16.dp),
-                indicator = {
-                    tabPositions ->
-                    TabRowDefaults.Indicator(
-                        Modifier
-                            .tabIndicatorOffset(tabPositions[selectedTabIndex.value]),
-                        color = Color.Red,
-                        height = 3.dp
-                    )
-                }
-            ) {
-                listTabs.forEachIndexed{
-                    index,currentTab->
-                    Tab(
-                        selected = selectedTabIndex.value == index,
-                        selectedContentColor = Color.White.copy(alpha = 0.8f),
-                        unselectedContentColor = Color.White.copy(alpha = 0.1f),
-                        onClick = {
-                            scope.launch {
-                                pagerState.animateScrollToPage(index)
-                            }
-                        },
-                        text = {Text(text = currentTab.title , style = TextStyle(
-                            fontFamily = FontFamily.SansSerif, fontSize = 14.sp, fontWeight = FontWeight.Bold
-                        ))},
-
-                    )
-                }
-            }
-            HorizontalPager(
-                state=pagerState,
+    MovieAppTheme{
+        Scaffold(
+            modifier = modifier
+        ){
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = colorResource(R.color.blackBackground))
+                    .padding(top = it.calculateTopPadding())
             ) {
-                page->
-                setUpTabLayouts(viewmodel,page)
+                TabRow(
+                    containerColor = colorResource(R.color.blackBackground),
+                    selectedTabIndex = selectedTabIndex.value,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(color = colorResource(R.color.blackBackground))
+                        .padding(horizontal = MovieAppTheme.paddingDimension.padding3),
+                    indicator = {
+                            tabPositions ->
+                        TabRowDefaults.Indicator(
+                            Modifier
+                                .tabIndicatorOffset(tabPositions[selectedTabIndex.value]),
+                            color = Color.Red,
+                            height = MovieAppTheme.thinDimension.t4
+                        )
+                    }
+                ) {
+                    listTabs.forEachIndexed{
+                            index,currentTab->
+                        Tab(
+                            selected = selectedTabIndex.value == index,
+                            selectedContentColor = Color.White.copy(MovieAppTheme.alpha.a8),
+                            unselectedContentColor = Color.White.copy(alpha = MovieAppTheme.alpha.a1),
+                            onClick = {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
+                            },
+                            text = {Text(text = currentTab.title , style = MovieAppTheme.appTypoTheme.t18)},
+
+                            )
+                    }
+                }
+                HorizontalPager(
+                    state=pagerState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color = colorResource(R.color.blackBackground))
+                ) {
+                        page->
+                    setUpTabLayouts(viewmodel,page)
+                }
             }
         }
     }
+
 }

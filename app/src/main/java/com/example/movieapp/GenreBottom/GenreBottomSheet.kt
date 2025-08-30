@@ -54,6 +54,7 @@ import com.example.movieapp.MainActivity.SectionTitle
 import com.example.movieapp.R
 import com.example.movieapp.SearchBar
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
+import com.example.movieapp.ui.theme.MovieAppTheme
 import kotlin.properties.Delegates
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -73,8 +74,7 @@ fun GenreBottomSheet(
     val density = LocalDensity.current
     var screenWidth by Delegates.notNull<Int>()
     ModalBottomSheet(
-        dragHandle = {BottomSheetDefaults.DragHandle(color = Color.Red.copy(alpha = 0.8f))},
-        tonalElevation = 20.dp,
+        dragHandle = {BottomSheetDefaults.DragHandle(color = Color.Red.copy(alpha = MovieAppTheme.alpha.a8))},
         containerColor = colorResource(R.color.blackBackground),
         onDismissRequest = {
             hideBottomSheet()
@@ -94,14 +94,14 @@ fun GenreBottomSheet(
                     data->
                     viewModel.onSearchListener(data)
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer3))
                 Column(
                     modifier = Modifier.verticalScroll(rememberScrollState())
                 ){
-                    Row(modifier = Modifier.padding(horizontal = 16.dp),
+                    Row(modifier = Modifier.padding(horizontal =MovieAppTheme.paddingDimension.padding3),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceEvenly){
-                        Line(modifier = Modifier.padding(end=16.dp).width(lineState.dp),lineState)
+                        Line(modifier = Modifier.padding(end=MovieAppTheme.paddingDimension.padding3).width(lineState.dp),lineState)
                         Text(text = data, modifier = Modifier.onGloballyPositioned {
                                 layoutCoordinates ->
                             val size = layoutCoordinates.size
@@ -110,18 +110,18 @@ fun GenreBottomSheet(
                         },
                             style = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.Bold)
                         )
-                        Line(modifier = Modifier.padding(start = 16.dp).width(lineState.dp),lineState)
+                        Line(modifier = Modifier.padding(start = MovieAppTheme.paddingDimension.padding3).width(lineState.dp),lineState)
                     }
-                    SectionTitle("New Movies",true) { }
-                    Spacer(Modifier.height(8.dp))
+                    SectionTitle(R.string.new_movies.toString(),true) { }
+                    Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
                     ListFilm(listFilm.value)
-                    Spacer(Modifier.height(8.dp))
-                    SectionTitle("Upcoming Movies",true) { }
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
+                    SectionTitle(R.string.upcoming_movies.toString(),true) { }
+                    Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
                     ListFilm(listFilm.value)
-                    Spacer(Modifier.height(8.dp))
-                    SectionTitle("Watched",true) { }
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
+                    SectionTitle(R.string.watched.toString(),true) { }
+                    Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
                     ListTv(listFilm.value)
                 }
 
@@ -142,16 +142,16 @@ fun OnShowBottomSheet(data: String,isShowBottomSheet:Boolean,sheetState:SheetSta
 fun Line(modifier: Modifier,int:Int){
     Box(
         modifier = modifier
-            .height(0.5.dp)
-            .background(Color.Gray.copy(alpha = 0.5f))
+            .height(MovieAppTheme.thinDimension.t1)
+            .background(Color.Gray.copy(alpha = MovieAppTheme.alpha.a5))
     )
 }
 
 @Composable
 fun ListFilm(listFilm:List<FilmItemModel>){
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp)
+        horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding1),
+        contentPadding = PaddingValues(horizontal =MovieAppTheme.paddingDimension.padding3)
     ){
         items(listFilm){
                 item->
@@ -162,8 +162,8 @@ fun ListFilm(listFilm:List<FilmItemModel>){
 @Composable
 fun ListTv(listFilm:List<FilmItemModel>){
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp)
+        horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding1),
+        contentPadding = PaddingValues(horizontal = MovieAppTheme.paddingDimension.padding3)
     ){
         items(listFilm){
                 item->
@@ -175,10 +175,10 @@ fun ListTv(listFilm:List<FilmItemModel>){
 fun Movie(filmItemModel: FilmItemModel,onClick:()->Unit){
     Column {
         Video(filmItemModel.Poster, modifier = Modifier)
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
         Text(
             text = filmItemModel.Title,
-            style = TextStyle(fontSize = 13.sp, color = Color.White)
+            style = MovieAppTheme.appTypoTheme.t23
         )
     }
 

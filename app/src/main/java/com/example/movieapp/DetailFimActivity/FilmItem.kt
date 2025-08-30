@@ -44,18 +44,18 @@ fun FilmItem(item: FilmItemModel, onClick:(FilmItemModel)->Unit){
     }
     Box(
         modifier = Modifier
-            .width(140.dp)
+            .width(MovieAppTheme.blockDimension.b14)
             .clickable {
                 onClick(item)
             }
             .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField),
+                elevation =MovieAppTheme.dimensionValue.e1,
+                shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20),
                 clip = false
             )
-            .border(BorderStroke(width=1.dp, color = Color.Black), shape =RoundedCornerShape(
-                MovieAppTheme.dimensionValue.roundCornerForTextField) )
-            .clip(RoundedCornerShape(MovieAppTheme.dimensionValue.roundCornerForTextField))
+            .border(BorderStroke(width=MovieAppTheme.thinDimension.t2, color = Color.Black), shape =RoundedCornerShape(
+                MovieAppTheme.roundedCornerDimension.r20) )
+            .clip(RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r20))
             .background(color = Red)
     ){
 
@@ -64,21 +64,21 @@ fun FilmItem(item: FilmItemModel, onClick:(FilmItemModel)->Unit){
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .size(width = 140.dp,height = 200.dp)
+                .size(width = MovieAppTheme.blockDimension.b14,height = MovieAppTheme.blockDimension.b20)
                 .background(Color.Gray),
         )
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .padding(12.dp)
+                .padding(MovieAppTheme.paddingDimension.padding2)
                 .align(Alignment.TopStart)
-                .height(20.dp)
-                .width(50.dp)
-                .clip(shape = RoundedCornerShape(5.dp))
+                .height(MovieAppTheme.blockDimension.b2)
+                .width(MovieAppTheme.blockDimension.b5)
+                .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r5))
                 .background(
-                    color = Color.Red.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(5.dp)
+                    color = Color.Red.copy(alpha = MovieAppTheme.alpha.a1),
+                    shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r5)
                 )
         ) {
             Image(
@@ -86,11 +86,11 @@ fun FilmItem(item: FilmItemModel, onClick:(FilmItemModel)->Unit){
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .height(10.dp)
-                    .width(20.dp)
-                    .clip(shape = RoundedCornerShape(2.dp))
+                    .height(MovieAppTheme.blockDimension.b1)
+                    .width(MovieAppTheme.blockDimension.b2)
+                    .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r2))
             )
-            Text(text = "${item.Imdb}", style = TextStyle(fontSize = 8.sp, color = Color.White))
+            Text(text = "${item.Imdb}", style = MovieAppTheme.appTypoTheme.t12)
         }
     }
 }

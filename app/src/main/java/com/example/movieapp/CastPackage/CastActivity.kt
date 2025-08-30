@@ -58,6 +58,7 @@ import com.example.movieapp.MainActivity.SectionTitle
 import com.example.movieapp.R
 import com.example.movieapp.domain.CastModel
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
+import com.example.movieapp.ui.theme.MovieAppTheme
 
 class CastActivity : BaseActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -70,7 +71,10 @@ class CastActivity : BaseActivity() {
                 CastViewmodelFactory(castModel)
             )[CastViewmodel::class.java]
             setContent {
-                CastScreen(viewmodel,::onFilmClick)
+                MovieAppTheme{
+                    CastScreen(viewmodel,::onFilmClick)
+
+                }
             }
         }
     }
@@ -89,14 +93,14 @@ fun CastScreen(viewmodel: CastViewmodel,onFilmClick:(FilmItemModel)->Unit){
             .background(color = colorResource(R.color.blackBackground))
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 16.dp)
+            .padding(bottom = MovieAppTheme.paddingDimension.padding3)
     ) {
         Avatar(viewmodel.cast)
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer3))
         TabLayout(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(600.dp),
+                .height(MovieAppTheme.blockDimension.b60),
             viewmodel = viewmodel,
             getListTabLayouts()
         ) {
@@ -114,19 +118,18 @@ fun CastScreen(viewmodel: CastViewmodel,onFilmClick:(FilmItemModel)->Unit){
                         }
                     }
                     1->{
-                        Column(modifier = Modifier.padding(top =24.dp)) {
+                        Column(modifier = Modifier.padding(top = MovieAppTheme.paddingDimension.padding5)) {
                             Text(
-                                modifier = Modifier.padding(horizontal = 16.dp),
+                                modifier = Modifier.padding(horizontal =  MovieAppTheme.paddingDimension.padding3),
                                 text = viewmodelBackup.cast.Bio,
-                                style = TextStyle(color = Color.White, fontSize = 14.sp, fontFamily = FontFamily.SansSerif),
-                                lineHeight = 22.sp
+                                style =MovieAppTheme.appTypoTheme.t23
                             )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            SectionTitle("Gallery",true,null)
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height( MovieAppTheme.spacerDimension.spacer3))
+                            SectionTitle(R.string.gallery.toString(),true,null)
+                            Spacer(modifier = Modifier.height( MovieAppTheme.spacerDimension.spacer3))
                             LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = PaddingValues(start = 16.dp)
+                                horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding1),
+                                contentPadding = PaddingValues(start =MovieAppTheme.paddingDimension.padding3)
                             ) {
                                 for(link in viewmodel.cast.Gallery){
                                     item {
@@ -147,22 +150,22 @@ fun Avatar(castModel: CastModel){
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(380.dp)
+            .height(MovieAppTheme.blockDimension.b38)
     ){
         AsyncImage(
             model = castModel.PicUrl,
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()
-                .alpha(0.1f),
+                .alpha(MovieAppTheme.alpha.a1),
             contentScale = ContentScale.Crop
         )
         Image(
             painter = painterResource(R.drawable.back),
             contentDescription = null,
             modifier = Modifier
-                .padding(top = 64.dp, start = 16.dp)
-                .size(32.dp)
+                .padding(top = MovieAppTheme.paddingDimension.padding12, start = MovieAppTheme.paddingDimension.padding7)
+                .size(MovieAppTheme.viewDimension.v7)
         )
         Box(
             modifier = Modifier
@@ -190,37 +193,29 @@ fun Biography(modifier: Modifier,castModel: CastModel){
     ) {
         Text(
             text = castModel.Actor,
-            style = TextStyle(color = Color.White.copy(alpha = 0.8f),
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 24.sp
-            )
+            style =MovieAppTheme.appTypoTheme.t24
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer5))
         AsyncImage(
             model = castModel.PicUrl,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .size(120.dp)
+                .size(MovieAppTheme.blockDimension.b12)
                 .border(
                     BorderStroke(
-                        width = 0.5.dp, color = colorResource(R.color.blackBackground)
+                        width =MovieAppTheme.thinDimension.t1, color = colorResource(R.color.blackBackground)
                     ), shape = CircleShape
                 )
                 .clip(shape = CircleShape)
 
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer3))
         Text(
-            text = "38 movies",
-            style = TextStyle(color = Color.White.copy(alpha = 0.8f),
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.Normal,
-                fontSize = 16.sp
-            )
+            text = "${castModel.Movies.size}",
+            style = MovieAppTheme.appTypoTheme.textStyleForSearch
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer3))
         Row(
             verticalAlignment = Alignment.CenterVertically
         ){
@@ -229,37 +224,25 @@ fun Biography(modifier: Modifier,castModel: CastModel){
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .height(16.dp)
-                    .width(32.dp)
-                    .clip(shape = RoundedCornerShape(2.dp))
+                    .height(MovieAppTheme.viewDimension.v3)
+                    .width(MovieAppTheme.viewDimension.v7)
+                    .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r2))
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
 
             Text(
                 text = "Top ${castModel.Top}",
-                style = TextStyle(color = Color.White,
-                    fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 12.sp
-                )
+                style = MovieAppTheme.appTypoTheme.t21
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
             Text(
                 text = "*",
-                style = TextStyle(color = Color.White,
-                    fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 12.sp
-                )
+                style = MovieAppTheme.appTypoTheme.t21
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer1))
             Text(
                 text = castModel.Born,
-                style = TextStyle(color = Color.White,
-                    fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 12.sp
-                )
+                style = MovieAppTheme.appTypoTheme.t21
             )
         }
     }
@@ -269,9 +252,9 @@ fun Biography(modifier: Modifier,castModel: CastModel){
 fun SocialMedia(modifier: Modifier){
     Row(modifier = modifier) {
         Media(R.drawable.intagram)
-        Spacer(modifier = Modifier.width(24.dp))
+        Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer5))
         Media(R.drawable.meta)
-        Spacer(modifier = Modifier.width(24.dp))
+        Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer5))
         Media(R.drawable.twitter)
     }
 }
@@ -282,10 +265,10 @@ fun Media(source: Int){
         modifier = Modifier
             .size(40.dp)
             .background(
-                color = colorResource(R.color.red).copy(alpha = 0.05f),
-                shape = RoundedCornerShape(10.dp)
+                color = colorResource(R.color.red).copy(alpha =MovieAppTheme.alpha.a1/2),
+                shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r10)
             )
-            .clip(shape = RoundedCornerShape(10.dp))
+            .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r10))
     ){
         Icon(
             painter = painterResource(source),
@@ -293,7 +276,7 @@ fun Media(source: Int){
             tint = Color.Red,
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(24.dp)
+                .size(MovieAppTheme.iconDimension.i5)
         )
     }
 }
@@ -311,6 +294,6 @@ fun ActorImage(link:String){
         model = link,
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        modifier = Modifier.height(190.dp).width(140.dp).clip(RoundedCornerShape(10.dp))
+        modifier = Modifier.height(MovieAppTheme.blockDimension.b19).width(MovieAppTheme.blockDimension.b14).clip(RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r10))
     )
 }

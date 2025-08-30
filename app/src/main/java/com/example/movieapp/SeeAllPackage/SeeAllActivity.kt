@@ -63,6 +63,7 @@ import com.example.movieapp.MainActivity.BottomNavBar.BottomNavigationBar
 import com.example.movieapp.MainActivity.SectionTitle
 import com.example.movieapp.R
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
+import com.example.movieapp.ui.theme.MovieAppTheme
 import kotlinx.coroutines.launch
 
 class SeeAllActivity : BaseActivity() {
@@ -75,9 +76,12 @@ class SeeAllActivity : BaseActivity() {
                 SeeAllFactory(data)
             )[SeeAllViewmodel::class.java]
             setContent {
-                SeeAllScreen(data,viewmodel,::onFilmClick) {
-                    finish()
+                MovieAppTheme{
+                    SeeAllScreen(data,viewmodel,::onFilmClick) {
+                        finish()
+                    }
                 }
+
             }
         }
 
@@ -104,22 +108,18 @@ fun SeeAllScreen(title:String,viewmodel: SeeAllViewmodel,onFilmClick:(FilmItemMo
 fun TopBarTitle(title:String,onBackClick:()->Unit){
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(32.dp),
-        modifier = Modifier.padding(top = 48.dp, start = 16.dp, bottom = 4.dp)
+        horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding7 ),
+        modifier = Modifier.padding(top =MovieAppTheme.paddingDimension.padding11, start = MovieAppTheme.paddingDimension.padding3, bottom = MovieAppTheme.paddingDimension.padding0)
     ){
         Image(
             painter = painterResource(R.drawable.back),
             contentScale = ContentScale.Crop,
             contentDescription = null,
-            modifier = Modifier.size(32.dp).clickable { onBackClick() }
+            modifier = Modifier.size(MovieAppTheme.viewDimension.v7).clickable { onBackClick() }
         )
         Text(
             text = title,
-            style = TextStyle(color = Color.White.copy(alpha = 0.8f),
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 20.sp
-            )
+            style = MovieAppTheme.appTypoTheme.t13
         )
     }
 }

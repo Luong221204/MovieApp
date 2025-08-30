@@ -4,5 +4,40 @@
     <string name="fb_login_protocol_scheme">fb1234</string>
     <string name="facebook_client_token">56789</string>
     <string name="client_id">415746684150-n715q3eiemqhh7870esntrlg77oq58aq.apps.googleusercontent.com</string>
-
+    <string name = "upcoming_movies">Upcoming Movies</string>
+    <string name = "new_movies">New Movies</string>
+    <string name = "category">Categories</string>
+    <string name = "recommendation">Recommendation for you</string>
+    <string name = "see_all">See all</string>
+    <string name="last_10">The last 10 movies you watched will be here</string>
+    <string name="welcome">Welcome to the mini theater</string>
+    <string name="download">Download</string>
+    <string name="movies">Movies</string>
+    <string name="cartoons">Cartoons</string>
+    <string name="watched">Watched</string>
+    <string name="favourite">Favourite</string>
+    <string name="history">History</string>
+    <string name="tv">TV</string>
+    <string name="cast_crew">Casts and crew</string>
+    <string name="gallery">Gallery</string>
+    <string name="popular">Popular</string>
+    <string name="text">
+        I have a movie app with a feature that displays movies to users. Each movie includes a description, genres, IMDb rating, and duration. Users can watch videos using ExoPlayer, search for movies by genre, filter movies based on their preferences, record the movies they have watched, like (favorite) movies, and log in using Facebook or Google.
+    </string>
+    <string name="series">Series\n</string>
+    <string name="genre">Genre</string>
+    <string name="callendar">Calendar</string>
+    <string name="country">Country</string>
+    <string name="sort_by">Sort by</string>
+    <string name="reset">Reset</string>
+    <string name="apply">Apply</string>
+    <string name="forgot">Forgot your password ?</string>
+    <string name="login">Login</string>
+    <string name="google">Google</string>
+    <string name="facebook">Facebook</string>
+    <string name="email">Email</string>
+    <string name="password">password</string>
+    <string name="email_lowcase">email</string>
+    <string name="public_profile">public_profile</string>
+    <string name="canceled">Đã hủy</string>
 </resources>

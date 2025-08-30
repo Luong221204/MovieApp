@@ -42,6 +42,7 @@ import com.example.movieapp.R
 import com.example.movieapp.SearchBar
 import com.example.movieapp.ViewModel.SettingViewModel
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
+import com.example.movieapp.ui.theme.MovieAppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -83,7 +84,7 @@ fun SettingsScreen() {
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
-            Spacer(modifier = Modifier.height(54.dp))
+            Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer9))
             SearchBar(onFilterClick = {
                 showBottomSheet()
             }) {
@@ -105,11 +106,11 @@ fun SettingsScreen() {
 @Composable
 fun ItemsInRow(list: List<FilmItemModel>){
     Row(
-        modifier = Modifier.padding(horizontal = 16.dp)
+        modifier = Modifier.padding(horizontal =MovieAppTheme.paddingDimension.padding3)
     ){
         repeat(list.size){
             FilmItem2(list[it]) { }
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(MovieAppTheme.spacerDimension.spacer1))
 
         }
     }
@@ -135,57 +136,57 @@ fun <T> List<T>.CustomForEach(numberInRow:Int,emit:@Composable (List<T>)->Unit){
 @Composable
 fun Default(viewModel: SettingViewModel){
     val searchFilms = viewModel.searchFilm.collectAsState()
-    Spacer(Modifier.height(8.dp))
-    SectionTitle("Recommendation for you",false) { }
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(MovieAppTheme.spacerDimension.spacer1))
+    SectionTitle(R.string.recommendation.toString(),false) { }
+    Spacer(Modifier.height(MovieAppTheme.spacerDimension.spacer1))
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp)
+        horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding0),
+        contentPadding = PaddingValues(horizontal = MovieAppTheme.paddingDimension.padding3)
     ){
         items(searchFilms.value){
                 item->
             FilmItem(item){}
         }
     }
-    Spacer(Modifier.height(8.dp))
-    SectionTitle("Tv",false) { }
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(MovieAppTheme.spacerDimension.spacer1))
+    SectionTitle(R.string.tv.toString(),false) { }
+    Spacer(Modifier.height(MovieAppTheme.spacerDimension.spacer1))
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(horizontal =  MovieAppTheme.paddingDimension.padding3),
+        horizontalArrangement = Arrangement.spacedBy( MovieAppTheme.paddingDimension.padding1)
     ) {
         items(searchFilms.value){
             Movie(it) { }
         }
     }
-    Spacer(Modifier.height(8.dp))
-    SectionTitle("Popular",false) { }
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(MovieAppTheme.spacerDimension.spacer1))
+    SectionTitle(R.string.popular.toString(),false) { }
+    Spacer(Modifier.height(MovieAppTheme.spacerDimension.spacer1))
     searchFilms.value.CustomForEach(2){
             list->
         ItemsInRow(list)
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(Modifier.height(MovieAppTheme.spacerDimension.spacer1))
     }
-    Box(modifier = Modifier.height(100.dp).background(color = colorResource(R.color.blackBackground)))
+    Box(modifier = Modifier.height(MovieAppTheme.blockDimension.b10).background(color = colorResource(R.color.blackBackground)))
 }
 
 
 @Composable
 fun OnSearch(viewModel: SettingViewModel){
     val list=viewModel.filteredFilm.collectAsState()
-    Spacer(Modifier.height(8.dp))
-    SectionTitle("Movies",false) { }
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(MovieAppTheme.spacerDimension.spacer1))
+    SectionTitle(R.string.movies.toString(),false) { }
+    Spacer(Modifier.height(MovieAppTheme.spacerDimension.spacer1))
     ListFilm(list.value)
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(MovieAppTheme.spacerDimension.spacer1))
 
-    SectionTitle("Cartoons",false) { }
-    Spacer(Modifier.height(8.dp))
+    SectionTitle(R.string.cartoons.toString(),false) { }
+    Spacer(Modifier.height(MovieAppTheme.spacerDimension.spacer1))
     ListFilm(list.value)
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(MovieAppTheme.spacerDimension.spacer1))
 
-    SectionTitle("Cartoons",false) { }
-    Spacer(Modifier.height(8.dp))
+    SectionTitle(R.string.cartoons.toString(),false) { }
+    Spacer(Modifier.height(MovieAppTheme.spacerDimension.spacer1))
     ListTv(list.value)
-    Box(modifier = Modifier.height(100.dp).background(color = colorResource(R.color.blackBackground)))
+    Box(modifier = Modifier.height(MovieAppTheme.blockDimension.b10).background(color = colorResource(R.color.blackBackground)))
 }

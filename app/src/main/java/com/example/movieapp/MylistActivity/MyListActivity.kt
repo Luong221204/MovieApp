@@ -41,6 +41,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.movieapp.BaseActivity
 import com.example.movieapp.R
+import com.example.movieapp.ui.theme.MovieAppTheme
 
 class MyListActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,21 +63,17 @@ fun DownloadScreen(){
 @Composable
 fun TopBarTitle(title:String,onBackClick:()->Unit){
     Box(
-        modifier = Modifier.padding(top = 48.dp, bottom = 4.dp).fillMaxWidth()
+        modifier = Modifier.padding(top = MovieAppTheme.paddingDimension.padding11, bottom = MovieAppTheme.paddingDimension.padding0).fillMaxWidth()
     ){
         Image(
             painter = painterResource(R.drawable.back),
             contentScale = ContentScale.Crop,
             contentDescription = null,
-            modifier = Modifier.padding(start = 16.dp).size(32.dp).clickable { onBackClick() }.align(Alignment.TopStart)
+            modifier = Modifier.padding(start = MovieAppTheme.paddingDimension.padding3).size(MovieAppTheme.viewDimension.v7).clickable { onBackClick() }.align(Alignment.TopStart)
         )
         Text(
             text = title,
-            style = TextStyle(color = Color.White.copy(alpha = 0.8f),
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 20.sp
-            ),
+            style = MovieAppTheme.appTypoTheme.t13,
             modifier = Modifier.align(Alignment.Center)
         )
     }
@@ -89,39 +86,31 @@ fun DownloadItem(){
             painter = painterResource(R.drawable.film),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.width(80.dp).fillMaxHeight()
+            modifier = Modifier.width(MovieAppTheme.blockDimension.b8).fillMaxHeight()
         )
     }
     Row(
-        modifier = Modifier.height(170.dp).fillMaxWidth()
+        modifier = Modifier.height(MovieAppTheme.blockDimension.b17).fillMaxWidth()
             .padding(16.dp)
-            .border(BorderStroke(width = 1.dp, color = Color.Red.copy(alpha = 0.8f),), shape = RoundedCornerShape(15.dp))
-            .clip(shape = RoundedCornerShape(15.dp))
+            .border(BorderStroke(width = 1.dp, color = Color.Red.copy(alpha = MovieAppTheme.alpha.a8),), shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r16))
+            .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r15))
 
     ) {
 
-        Column(modifier = Modifier.padding(16.dp).width(240.dp)) {
-            Text(text = "Avatar 2 :The way of water hahahahahaha",
-                style = TextStyle(color = Color.White.copy(alpha = 0.8f),
-                    fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp
-                )
+        Column(modifier = Modifier.padding(MovieAppTheme.paddingDimension.padding3).width(MovieAppTheme.blockDimension.b24)) {
+            Text(text = "Avatar 2 :The way of water ",
+                style = MovieAppTheme.appTypoTheme.t18
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer3))
             Text(text = "Avatar 2 :The way of water",
-                style = TextStyle(color = Color.White.copy(alpha = 0.8f),
-                    fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp
-                ),
+                style = MovieAppTheme.appTypoTheme.t18
             )
         }
         Icon(
             painter = painterResource(R.drawable.save2),
             contentDescription = null,
             tint = Color.Red,
-            modifier = Modifier.padding(vertical = 16.dp).size(20.dp)
+            modifier = Modifier.padding(vertical = MovieAppTheme.paddingDimension.padding3).size(MovieAppTheme.iconDimension.i4)
         )
     }
 }

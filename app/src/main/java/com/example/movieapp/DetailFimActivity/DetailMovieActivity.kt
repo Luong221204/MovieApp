@@ -1,13 +1,15 @@
 package com.example.movieapp.DetailFimActivity
 
+import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.collection.mutableIntSetOf
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,9 +34,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -56,27 +56,20 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
@@ -88,19 +81,18 @@ import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.movieapp.BaseActivity
 import com.example.movieapp.CastPackage.CastActivity
-import com.example.movieapp.DetailFimActivity.Viewmodel.PlayMovieFactory
 import com.example.movieapp.MainActivity.SectionTitle
 import com.example.movieapp.MainActivity.Tag
 import com.example.movieapp.GenreBottom.OnShowBottomSheet
-import com.example.movieapp.MainActivity.screens.ExploreScreen.CustomForEach
-import com.example.movieapp.MainActivity.screens.ExploreScreen.ItemsInRow
-import com.example.movieapp.PlayerActivity.PlayVideoViewmodel
-import com.example.movieapp.PlayerActivity.VideoPlayer
+import com.example.movieapp.PlayerActivity.DescriptionForFilm
+import com.example.movieapp.PlayerActivity.PlayMovieActivity
 import com.example.movieapp.R
 import com.example.movieapp.domain.CastModel
 import com.example.movieapp.domain.FilmItemModel.FilmItemModel
 import com.example.movieapp.domain.FilmItemModel.Trailer
+import com.example.movieapp.ui.theme.MovieAppTheme
 import kotlinx.coroutines.launch
+import java.io.File
 
 class DetailMovieActivity : BaseActivity() {
     @RequiresApi(Build.VERSION_CODES.S)
@@ -115,16 +107,25 @@ class DetailMovieActivity : BaseActivity() {
             DetailMovieFactory(filmItem)
         )[DetailMovieViewmodel::class.java]
         setContent {
-            DetailMovieScreen(viewmodel, onBackClick = { finish()}, onFilmClick = ::onFilmClick){
-                castModel->
-                val intent = Intent(this,CastActivity::class.java)
-                intent.putExtra("cast",castModel)
-                startActivity(intent)
+            MovieAppTheme {
+                DetailMovieScreen(viewmodel, onBackClick = { finish()}, onFilmClick = ::onFilmClick, onToPlayMovie = ::onPlayMovie){
+                        castModel->
+                    val intent = Intent(this,CastActivity::class.java)
+                    intent.putExtra("cast",castModel)
+                    startActivity(intent)
+                }
             }
+           
         }
     }
     private fun onFilmClick(filmItemModel: FilmItemModel){
         val intent= Intent(this, DetailMovieActivity::class.java)
+        intent.putExtra("object",filmItemModel)
+        startActivity(intent)
+    }
+
+    private fun onPlayMovie(filmItemModel: FilmItemModel){
+        val intent= Intent(this, PlayMovieActivity::class.java)
         intent.putExtra("object",filmItemModel)
         startActivity(intent)
     }
@@ -134,13 +135,16 @@ class DetailMovieActivity : BaseActivity() {
 @RequiresApi(Build.VERSION_CODES.S)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit, onFilmClick: (FilmItemModel) -> Unit, onCastClick :(CastModel)->Unit) {
+fun DetailMovieScreen(
+    viewmodel: DetailMovieViewmodel,
+    onBackClick: () -> Unit,
+    onFilmClick: (FilmItemModel) -> Unit,
+    onToPlayMovie:(FilmItemModel)->Unit,
+    onCastClick :(CastModel)->Unit,
+    ) {
     val scrollState = rememberScrollState()
-    var height by remember{
-        mutableIntStateOf(0)
-    }
+
     var showDialog by remember { mutableStateOf(false) }
-    var isExpanded by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
@@ -173,25 +177,28 @@ fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit, 
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .clickable {
+                    onToPlayMovie(film)
+                }
                 .verticalScroll(scrollState)
         ) {
             Box(
-                modifier = Modifier.height(400.dp)
+                modifier = Modifier.height(MovieAppTheme.blockDimension.b40)
             ) {
                 Image(
                     painter = painterResource(R.drawable.back),
                     contentDescription = null,
                     modifier = Modifier
-                        .padding(start = 16.dp, top = 64.dp)
-                        .size(32.dp)
+                        .padding(start =  MovieAppTheme.paddingDimension.padding3, top =  MovieAppTheme.paddingDimension.padding12)
+                        .size(MovieAppTheme.viewDimension.v7)
                         .clickable { onBackClick() }
                 )
                 Image(
                     painter = painterResource(R.drawable.fav),
                     contentDescription = null,
                     modifier = Modifier
-                        .padding(end = 16.dp, top = 64.dp)
-                        .size(32.dp)
+                        .padding(end =  MovieAppTheme.paddingDimension.padding3, top =  MovieAppTheme.paddingDimension.padding12)
+                        .size(MovieAppTheme.viewDimension.v7)
                         .align(Alignment.TopEnd)
                 )
                 AsyncImage(
@@ -199,20 +206,20 @@ fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit, 
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
                     contentDescription = null,
-                    alpha = 0.1f
+                    alpha =  MovieAppTheme.alpha.a1
                 )
                 AsyncImage(
                     model = film.Poster,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(210.dp, 300.dp)
-                        .clip(RoundedCornerShape(30.dp))
+                        .size(MovieAppTheme.blockDimension.b21,  MovieAppTheme.blockDimension.b30)
+                        .clip(RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r30))
                         .align(Alignment.BottomCenter),
                     contentDescription = null,
                 )
                 Box(
                     modifier = Modifier
-                        .height(100.dp)
+                        .height(MovieAppTheme.blockDimension.b10)
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter)
                         .background(
@@ -227,60 +234,31 @@ fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit, 
                 )
                 Text(
                     text = film.Title,
-                    style = TextStyle(color = Color.White, fontSize = 32.sp, fontFamily = FontFamily.Cursive),
+                    style =MovieAppTheme.appTypoTheme.t6,
                     modifier = Modifier
-                        .padding(end = 16.dp, top = 48.dp)
+                        .padding(end = MovieAppTheme.paddingDimension.padding3, top =  MovieAppTheme.paddingDimension.padding11)
                         .align(Alignment.BottomCenter)
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                IconChain()
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer3))
+            Column(modifier = Modifier.padding(horizontal = MovieAppTheme.paddingDimension.padding3)) {
+                IconChain(modifier = Modifier.padding(horizontal = MovieAppTheme.paddingDimension.padding9).fillMaxWidth())
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer3))
                 Caption(filmItemModel = film)
-                Spacer(modifier = Modifier.height(16.dp))
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(film.Genre){
-                        Tag(showBottomSheet,it)
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                var isOver by remember { mutableStateOf(film.Description.length>120) }
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer3))
+                ListGenre(modifier = Modifier,film.Genre,showBottomSheet)
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer3))
 
-                androidx.compose.material3.Text(
-                    lineHeight = 22.sp,
-                    text = buildAnnotatedString {
-                        if (!isExpanded && film.Description.length > 120) {
-                            append(film.Description.take(120))
-                            withStyle(
-                                style = SpanStyle(
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color.Red
-                                )
-                            ) {
-                                append("...Xem thêm")
-                            }
-                        } else {
-                            append(film.Description)
-                        }
-                    },
-                    style = TextStyle(
-                        color = Color.White.copy(alpha = if(isExpanded || !isOver) 1f else 0.3f) ,
-                        fontSize = 14.sp,
-                        fontFamily = FontFamily.SansSerif
-                    ),
-                    modifier = Modifier.clickable { isExpanded = !isExpanded }
-                )
-                Spacer(modifier = Modifier.height(24.dp))
+                DescriptionForFilm(modifier = Modifier,film.Description)
+
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer5))
                 Teaser(film.Trailer){
                     showDialog=true
                 }
             }
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer5))
             TabLayout(
-                modifier = Modifier.height(600.dp).fillMaxWidth(),
+                modifier = Modifier.height(MovieAppTheme.blockDimension.b60).fillMaxWidth(),
                 viewmodel,
                 getListTabLayouts()
             ){
@@ -299,7 +277,7 @@ fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit, 
 
                         }
                         1-> Column {
-                            Spacer(modifier=Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer5))
                             About(cast.value,viewmodel.filmItemModel.Gallery, onClick = onCastClick)
                         }
                     }
@@ -310,34 +288,60 @@ fun DetailMovieScreen(viewmodel: DetailMovieViewmodel, onBackClick: () -> Unit, 
     }
 }
 
+
+@Composable
+fun ListGenre(modifier: Modifier,list: List<String>,showBottomSheet:(String)->Unit){
+    LazyRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding3)
+    ) {
+        items(list){
+            Tag(showBottomSheet,it)
+        }
+    }
+}
 @Composable
 fun FilmIcon(source:Int,onClick:()->Unit){
     Box(
-        modifier = Modifier.size(32.dp)
+        modifier = Modifier.size(MovieAppTheme.viewDimension.v7)
+            .clickable { onClick() }
             .background(
-                color = colorResource(R.color.red).copy(alpha = 0.05f),
-                shape = RoundedCornerShape(10.dp)
+                color = colorResource(R.color.red).copy(alpha = MovieAppTheme.alpha.a1/2),
+                shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r10)
             )
-            .clip(shape = RoundedCornerShape(10.dp))
+            .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r10))
     ){
         Icon(
             painter = painterResource(source),
             contentDescription = null,
             tint = Color.Red,
-            modifier = Modifier.align(Alignment.Center).size(16.dp)
+            modifier = Modifier.align(Alignment.Center).size(MovieAppTheme.viewDimension.v3)
         )
     }
 }
 
 @Composable
-fun IconChain(){
+fun IconChain(modifier: Modifier){
+    val context = LocalContext.current
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp),
+        modifier = modifier,
         horizontalArrangement = Arrangement.SpaceAround
     ) {
-        FilmIcon(R.drawable.download) { }
+        FilmIcon(R.drawable.download) {
+
+        }
         FilmIcon(R.drawable.save2) { }
-        FilmIcon(R.drawable.send) { }
+        FilmIcon(R.drawable.send) {
+
+            val shareText = "https://youtu.be/abc123"
+            val sendIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, shareText)
+                type = "text/plain"
+            }
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            context.startActivity(shareIntent)
+        }
         FilmIcon(R.drawable.more) { }
 
     }
@@ -350,9 +354,9 @@ fun Caption(filmItemModel: FilmItemModel){
         verticalAlignment = Alignment.CenterVertically
     ) {
         PartialCaption("${filmItemModel.Imdb}",R.drawable.star)
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer3))
         PartialCaption(filmItemModel.Time,R.drawable.time)
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer3))
         PartialCaption("${filmItemModel.Year}",R.drawable.cal)
     }
 }
@@ -363,11 +367,10 @@ fun PartialCaption(text:String,source:Int){
         painter = painterResource(source),
         contentDescription = null,
         tint = Color.Red,
-        modifier = Modifier.padding(end = 8.dp).size(13.dp)
+        modifier = Modifier.padding(end = MovieAppTheme.paddingDimension.padding1).size(MovieAppTheme.iconDimension.i2)
     )
-    Text(text = text, color = Color.White,
-        style = TextStyle(fontFamily = FontFamily.SansSerif,
-            fontSize = 12.sp)
+    Text(text = text,
+        style = MovieAppTheme.appTypoTheme.t7
     )
 }
 
@@ -377,7 +380,7 @@ fun Teaser(trailer:Trailer,onClick: () -> Unit){
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
-            .background(color = colorResource(R.color.black1), shape = RoundedCornerShape(10.dp)),
+            .background(color = colorResource(R.color.black1), shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r10)),
     ){
         Box(
             modifier = Modifier.weight(1f)
@@ -388,18 +391,14 @@ fun Teaser(trailer:Trailer,onClick: () -> Unit){
         Box(
             modifier = Modifier.weight(1f)
         ){
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(MovieAppTheme.paddingDimension.padding3)) {
                 Text(
-                    lineHeight = 19.sp,
-                    text = trailer.Name,color = Color.White,
-                    style = TextStyle(fontFamily = FontFamily.SansSerif,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp)
+                    text = trailer.Name,
+                    style =MovieAppTheme.appTypoTheme.t8
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(text = trailer.TimeString(),color = Color.White,
-                    style = TextStyle(fontFamily = FontFamily.SansSerif,
-                        fontSize = 10.sp))
+                Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer2))
+                Text(text = trailer.TimeString(),
+                    style = MovieAppTheme.appTypoTheme.t9)
             }
 
         }
@@ -414,9 +413,9 @@ fun Video(link:String,modifier: Modifier){
             model = link,
             contentScale=ContentScale.Crop,
             modifier = Modifier
-                .alpha(0.7f)
-                .clip(shape = RoundedCornerShape(10.dp))
-                .height(105.dp).aspectRatio(15/9f),
+                .alpha( MovieAppTheme.alpha.a7)
+                .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r10))
+                .height(MovieAppTheme.blockDimension.b10).aspectRatio(15/9f),
             contentDescription = null
         )
         Icon(
@@ -424,10 +423,10 @@ fun Video(link:String,modifier: Modifier){
             contentDescription = null,
             tint = Color.White,
             modifier = Modifier
-                .size(32.dp)
+                .size( MovieAppTheme.viewDimension.v7)
                 .align(Alignment.Center)
-                .shadow(elevation = 10.dp)
-                .padding(end = 8.dp)
+                .shadow(elevation = MovieAppTheme.blockDimension.b10)
+                .padding(end = MovieAppTheme.paddingDimension.padding1)
         )
     }
 
@@ -444,9 +443,9 @@ fun getListTabLayouts():List<TabLayoutItem>{
 fun MoreLikeThis(list:List<FilmItemModel>,onClick: (FilmItemModel) -> Unit){
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp)
+        horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding1),
+        verticalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding1),
+        contentPadding = PaddingValues(horizontal = MovieAppTheme.paddingDimension.padding3, vertical = MovieAppTheme.paddingDimension.padding5)
     ) {
         for(element in list){
             item {
@@ -464,19 +463,14 @@ fun About(list:List<CastModel>, listLinks:List<String> , onClick: (CastModel) ->
     Column(
     ) {
         Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            text = "Casts and crew",
-            style= TextStyle(
-                color = Color.White,
-                fontSize = 15.sp,
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.Bold
-            )
+            modifier = Modifier.padding(horizontal = MovieAppTheme.paddingDimension.padding3),
+            text = R.string.cast_crew.toString(),
+            style= MovieAppTheme.appTypoTheme.t10
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(MovieAppTheme.spacerDimension.spacer3))
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            contentPadding = PaddingValues(horizontal = MovieAppTheme.paddingDimension.padding3),
+            horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding1)
         ) {
             for(i in list.indices){
                 item{
@@ -484,10 +478,10 @@ fun About(list:List<CastModel>, listLinks:List<String> , onClick: (CastModel) ->
                 }
             }
         }
-        SectionTitle("Gallery",true,null)
+        SectionTitle(R.string.gallery.toString(),true,null)
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            contentPadding = PaddingValues(horizontal = MovieAppTheme.paddingDimension.padding3),
+            horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding1)
         ) {
             for (i in listLinks.indices){
                 item {
@@ -504,38 +498,31 @@ fun About(list:List<CastModel>, listLinks:List<String> , onClick: (CastModel) ->
 @Composable
 fun Cast(castModel: CastModel,onClick: (CastModel) -> Unit){
     Row(
-        modifier = Modifier.height(80.dp).width(150.dp).clickable { onClick(castModel) },
+        modifier = Modifier.height(MovieAppTheme.blockDimension.b8).width(MovieAppTheme.blockDimension.b15).clickable { onClick(castModel) },
         verticalAlignment = Alignment.CenterVertically
-        ,horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        ,horizontalArrangement = Arrangement.spacedBy(MovieAppTheme.paddingDimension.padding2)) {
         AsyncImage(
             model = castModel.PicUrl,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .clip(shape = CircleShape)
-                .width(70.dp)
-                .height(70.dp)
+                .size(MovieAppTheme.blockDimension.b7)
         )
         Text(
             text = castModel.Actor,
             maxLines = 3,
-            style = TextStyle(
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 12.sp,
-                lineHeight = 16.sp,
-                fontFamily = FontFamily.SansSerif,
-                color = Color.White.copy(alpha = 0.8f),
-            ),
+            style = MovieAppTheme.appTypoTheme.t11
         )
     }
 }
 @Composable
 fun FilmItem2(filmItemModel: FilmItemModel,onClick: (FilmItemModel) -> Unit){
     Box(modifier = Modifier
-        .height(230.dp)
-        .width(180.dp)
+        .height(MovieAppTheme.blockDimension.b23)
+        .width(MovieAppTheme.blockDimension.b18)
         .clickable { onClick(filmItemModel) }
-        .clip(shape = RoundedCornerShape(10.dp))) {
+        .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r10))) {
         AsyncImage(
             model = filmItemModel.Poster,
             contentScale = ContentScale.Crop,
@@ -546,14 +533,14 @@ fun FilmItem2(filmItemModel: FilmItemModel,onClick: (FilmItemModel) -> Unit){
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .padding(12.dp)
+                .padding(MovieAppTheme.paddingDimension.padding2)
                 .align(Alignment.TopStart)
-                .height(20.dp)
-                .width(50.dp)
-                .clip(shape = RoundedCornerShape(5.dp))
+                .height(MovieAppTheme.blockDimension.b2)
+                .width(MovieAppTheme.blockDimension.b5)
+                .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r5))
                 .background(
-                    color = Color.Red.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(5.dp)
+                    color = Color.Red.copy(alpha = MovieAppTheme.alpha.a1),
+                    shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r5)
                 )
         ) {
             Image(
@@ -561,11 +548,11 @@ fun FilmItem2(filmItemModel: FilmItemModel,onClick: (FilmItemModel) -> Unit){
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .height(10.dp)
-                    .width(20.dp)
-                    .clip(shape = RoundedCornerShape(2.dp))
+                    .height(MovieAppTheme.blockDimension.b1)
+                    .width(MovieAppTheme.blockDimension.b2)
+                    .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r2))
             )
-            Text(text = "${filmItemModel.Imdb}", style = TextStyle(fontSize = 8.sp, color = Color.White))
+            Text(text = "${filmItemModel.Imdb}", style =MovieAppTheme.appTypoTheme.t12)
         }
     }
 }
@@ -575,8 +562,8 @@ fun Gallery(link:String){
         model = link,
         contentScale=ContentScale.Crop,
         modifier = Modifier
-            .clip(shape = RoundedCornerShape(10.dp))
-            .height(105.dp).aspectRatio(15/9f),
+            .clip(shape = RoundedCornerShape(MovieAppTheme.roundedCornerDimension.r10))
+            .height(MovieAppTheme.blockDimension.b10).aspectRatio(15/9f),
         contentDescription = null
     )
 }

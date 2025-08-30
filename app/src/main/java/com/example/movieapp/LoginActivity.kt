@@ -179,21 +179,21 @@ fun LoginScreen(
                         vertical = MovieAppTheme.dimensionValue.verticalPadding
                     )
             ) {
-                Spacer(modifier = modifier.height(MovieAppTheme.dimensionValue.spacer1*10))
+                Spacer(modifier = modifier.height(MovieAppTheme.spacerDimension.spacer11))
                 Image(
                     painter = painterResource(R.drawable.woman),
                     contentDescription = null,
                     modifier = modifier
                         .size(200.dp)
                 )
-                Spacer(modifier = modifier.height(MovieAppTheme.dimensionValue.spacer1*4))
+                Spacer(modifier = modifier.height(MovieAppTheme.spacerDimension.spacer3))
                 Text(
-                    text="Welcome to the mini theater",
-                    modifier = modifier.width(200.dp),
+                    text=R.string.welcome.toString(),
+                    modifier = modifier.width(MovieAppTheme.blockDimension.b20),
                     style = MovieAppTheme.appTypoTheme.buttonTitle,
                     textAlign = TextAlign.Center,
                 )
-                Spacer(modifier = modifier.height(MovieAppTheme.dimensionValue.spacer1*4))
+                Spacer(modifier = modifier.height(MovieAppTheme.spacerDimension.spacer3))
                 Email(
                     email = email,
                     modifier = modifier.fillMaxWidth(),
@@ -201,7 +201,7 @@ fun LoginScreen(
                 ){
                     viewModel.email=it
                 }
-                Spacer(modifier = modifier.height(MovieAppTheme.dimensionValue.spacer1*3))
+                Spacer(modifier = modifier.height(MovieAppTheme.spacerDimension.spacer3))
                 Password(
                     password =password,
                     modifier = modifier.fillMaxWidth(),
@@ -211,28 +211,28 @@ fun LoginScreen(
                 ){
                     viewModel.password=it
                 }
-                Spacer(modifier = modifier.height(MovieAppTheme.dimensionValue.spacer1*3))
+                Spacer(modifier = modifier.height(MovieAppTheme.spacerDimension.spacer3))
                 Text(
-                    text  = "Forgot your password ?",
+                    text  = R.string.forgot.toString(),
                     style = MovieAppTheme.appTypoTheme.textFieldOutline.copy(fontSize = 13.sp),
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(MovieAppTheme.dimensionValue.spacer1*3))
+                Spacer(modifier = modifier.height(MovieAppTheme.spacerDimension.spacer3))
                 GradientButton(
-                    text = "Login",
+                    text = R.string.login.toString(),
                     onClickButton = onLoginClick,
-                    modifier = modifier.size(180.dp,50.dp))
-                Spacer(modifier = Modifier.height(MovieAppTheme.dimensionValue.spacer1*3))
+                    modifier = modifier.size(MovieAppTheme.blockDimension.b18,MovieAppTheme.blockDimension.b5))
+                Spacer(modifier = modifier.height(MovieAppTheme.spacerDimension.spacer3))
                 Row(horizontalArrangement = Arrangement.SpaceAround,
-                    modifier = Modifier.width(140.dp)) {
+                    modifier = Modifier.width(MovieAppTheme.blockDimension.b14)) {
                     OtherWayToLoginButton(
-                        text = "Google",
+                        text = R.string.google.toString(),
                         onClick = { onGoogleButtonClick(viewModel,launcher,activity) },
                         modifier = Modifier.size(MovieAppTheme.dimensionValue.iconSize),
                         resourceImage = R.drawable.google
                     )
                     OtherWayToLoginButton(
-                        text = "FaceBook",
+                        text = R.string.facebook.toString(),
                         onClick = {
                             onFacebookButtonClick(viewModel,context,callbackManager)
                             },
@@ -240,7 +240,7 @@ fun LoginScreen(
                         resourceImage = R.drawable.facebook
                     )
                 }
-                Spacer(modifier = Modifier.height(200.dp))
+                Spacer(modifier = Modifier.height(MovieAppTheme.blockDimension.b20))
                 Box( modifier = Modifier.fillMaxSize()){
                     Image(painter = painterResource(id = R.drawable.bg1),contentDescription = null, modifier = Modifier.fillMaxSize())
                 }
@@ -273,7 +273,7 @@ fun Email(
             onValueChange = onValueChange,
             placeholder = {
                 Text(
-                    text = "Email",
+                    text = R.string.email.toString(),
                     style = MovieAppTheme.appTypoTheme.textFieldOutline.copy(color = Color.White.copy(alpha = 0.5f)),
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Start
@@ -322,8 +322,8 @@ fun Password(
         onValueChange = onValueChange,
         placeholder = {
             Text(
-                text = "Password",
-                style = MovieAppTheme.appTypoTheme.textFieldOutline.copy(color = Color.White.copy(alpha = 0.5f)),
+                text = R.string.password.toString(),
+                style = MovieAppTheme.appTypoTheme.textFieldOutline.copy(color = Color.White.copy(alpha = MovieAppTheme.alpha.a5)),
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Start
             )
@@ -357,7 +357,7 @@ fun Password(
                 ),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(MovieAppTheme.iconDimension.i5)
                     .clickable {
                         isShowPassword = !isShowPassword
                     },
@@ -376,7 +376,7 @@ fun Password(
             .fillMaxWidth()
             .border(
                 BorderStroke(
-                    width = 2.dp,
+                    width = MovieAppTheme.thinDimension.t3,
                     brush = Brush.linearGradient(
                         colors = MovieAppTheme.colorScheme.linearGradientColorsForTextField
                     ),
@@ -434,17 +434,17 @@ fun onFacebookButtonClick(
     activity?.let{
         LoginManager.getInstance().logInWithReadPermissions(
             it,
-            listOf("email", "public_profile")
+            listOf(R.string.email_lowcase.toString(), R.string.public_profile.toString())
         )
         LoginManager.getInstance().registerCallback(callbackManager,
             object : FacebookCallback<com.facebook.login.LoginResult> {
                 override fun onCancel() {
-                    Toast.makeText(context, "Đã hủy", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.canceled.toString(), Toast.LENGTH_SHORT).show()
                     viewModel.onErrorLogin()
 
                 }
                 override fun onError(error: FacebookException) {
-                    Toast.makeText(context, "Lỗi: ${error.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, " ${error.message}", Toast.LENGTH_SHORT).show()
                     viewModel.onErrorLogin()
                 }
 
@@ -471,14 +471,14 @@ fun CircularLoginProcess(){
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Transparent.copy(alpha = 0.5f))
+            .background(Color.Transparent.copy(alpha =MovieAppTheme.alpha.a5))
             .clickable(enabled = false){ }
     ){
         CircularProgressIndicator(
             color = Color.White,
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(60.dp)
+                .size(MovieAppTheme.viewDimension.v12)
                 .background(color = Color.Transparent)
         )
     }

@@ -17,5 +17,6 @@ data class FilmItemModelFilter(
     var Casts: ArrayList<DocumentReference> =ArrayList(),
     var CastsAfterFilter: ArrayList<CastModel> =ArrayList(),
     var Gallery: ArrayList<String> =ArrayList(),
+    val Link:String = "",
     var id:String=""
     ): Serializable
